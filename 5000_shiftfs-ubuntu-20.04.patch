@@ -1,6 +1,6 @@
---- /dev/null	2021-01-08 13:33:13.190303432 -0500
-+++ b/fs/shiftfs.c	2021-01-08 19:02:40.000000000 -0500
-@@ -0,0 +1,2157 @@
+--- /dev/null	2021-07-02 07:32:48.742034238 -0400
++++ b/fs/shiftfs.c	2021-07-02 13:55:18.327684885 -0400
+@@ -0,0 +1,2172 @@
 +#include <linux/btrfs.h>
 +#include <linux/capability.h>
 +#include <linux/cred.h>
@@ -1427,7 +1427,7 @@
 +	kfree(v1);
 +	kfree(v2);
 +
-+	return ret;
++	return ret ? -EFAULT: 0;
 +}
 +
 +static int shiftfs_btrfs_ioctl_fd_replace(int cmd, void __user *arg,
@@ -1441,6 +1441,9 @@
 +	struct btrfs_ioctl_vol_args *v1 = NULL;
 +	struct btrfs_ioctl_vol_args_v2 *v2 = NULL;
 +
++	*b1 = NULL;
++	*b2 = NULL;
++
 +	if (!is_btrfs_snap_ioctl(cmd))
 +		return 0;
 +
@@ -1449,29 +1452,29 @@
 +		if (IS_ERR(v1))
 +			return PTR_ERR(v1);
 +		oldfd = v1->fd;
-+		*b1 = v1;
 +	} else {
 +		v2 = memdup_user(arg, sizeof(*v2));
 +		if (IS_ERR(v2))
 +			return PTR_ERR(v2);
 +		oldfd = v2->fd;
-+		*b2 = v2;
 +	}
 +
 +	src = fdget(oldfd);
-+	if (!src.file)
-+		return -EINVAL;
++	if (!src.file) {
++		ret = -EINVAL;
++		goto err_free;
++	}
 +
 +	ret = shiftfs_real_fdget(src.file, &lfd);
 +	if (ret) {
 +		fdput(src);
-+		return ret;
++		goto err_free;
 +	}
 +
 +	/*
 +	 * shiftfs_real_fdget() does not take a reference to lfd.file, so
 +	 * take a reference here to offset the one which will be put by
-+	 * __close_fd(), and make sure that reference is put on fdput(lfd).
++	 * close_fd(), and make sure that reference is put on fdput(lfd).
 +	 */
 +	get_file(lfd.file);
 +	lfd.flags |= FDPUT_FPUT;
@@ -1480,7 +1483,8 @@
 +	*newfd = get_unused_fd_flags(lfd.file->f_flags);
 +	if (*newfd < 0) {
 +		fdput(lfd);
-+		return *newfd;
++		ret = *newfd;
++		goto err_free;
 +	}
 +
 +	fd_install(*newfd, lfd.file);
@@ -1495,8 +1499,19 @@
 +		v2->fd = oldfd;
 +	}
 +
-+	if (ret)
++	if (!ret) {
++		*b1 = v1;
++		*b2 = v2;
++	} else {
 +		shiftfs_btrfs_ioctl_fd_restore(cmd, *newfd, arg, v1, v2);
++		ret = -EFAULT;
++	}
++
++	return ret;
++
++err_free:
++	kfree(v1);
++	kfree(v2);
 +
 +	return ret;
 +}
@@ -2158,45 +2173,45 @@
 +MODULE_LICENSE("GPL v2");
 +module_init(shiftfs_init)
 +module_exit(shiftfs_exit)
---- a/include/uapi/linux/magic.h	2021-01-06 19:08:45.234777659 -0500
-+++ b/include/uapi/linux/magic.h	2021-01-06 19:09:53.900375394 -0500
-@@ -96,4 +96,6 @@
- #define DEVMEM_MAGIC		0x454d444d	/* "DMEM" */
+--- a/include/uapi/linux/magic.h	2021-07-02 13:19:57.024999483 -0400
++++ b/include/uapi/linux/magic.h	2021-07-02 13:21:16.215074343 -0400
+@@ -98,4 +98,6 @@
  #define Z3FOLD_MAGIC		0x33
+ #define PPC_CMM_MAGIC		0xc7571590
  
-+#define SHIFTFS_MAGIC         0x6a656a62
++#define SHIFTFS_MAGIC		0x6a656a62
 +
  #endif /* __LINUX_MAGIC_H__ */
---- a/fs/Makefile	2021-01-08 18:08:28.187064015 -0500
-+++ b/fs/Makefile	2021-01-08 18:09:00.788217579 -0500
+--- a/fs/Makefile	2021-07-02 13:22:24.815163699 -0400
++++ b/fs/Makefile	2021-07-02 13:22:43.991858989 -0400
 @@ -136,3 +136,4 @@ obj-$(CONFIG_EFIVAR_FS)		+= efivarfs/
  obj-$(CONFIG_EROFS_FS)		+= erofs/
  obj-$(CONFIG_VBOXSF_FS)		+= vboxsf/
  obj-$(CONFIG_ZONEFS_FS)		+= zonefs/
-+obj-$(CONFIG_SHIFT_FS)    += shiftfs.o
---- a/fs/Kconfig	2021-01-06 19:14:17.709697891 -0500
-+++ b/fs/Kconfig	2021-01-06 19:15:23.413281282 -0500
-@@ -122,6 +122,24 @@ source "fs/autofs/Kconfig"
++obj-$(CONFIG_SHIFT_FS)		+= shiftfs.o
+--- a/fs/Kconfig	2021-07-02 13:24:13.908678796 -0400
++++ b/fs/Kconfig	2021-07-02 13:28:26.312574889 -0400
+@@ -123,6 +123,24 @@ source "fs/autofs/Kconfig"
  source "fs/fuse/Kconfig"
  source "fs/overlayfs/Kconfig"
  
 +config SHIFT_FS
-+  tristate "UID/GID shifting overlay filesystem for containers"
-+  help
-+    This filesystem can overlay any mounted filesystem and shift
-+    the uid/gid the files appear at.  The idea is that
-+    unprivileged containers can use this to mount root volumes
-+    using this technique.
++	tristate "UID/GID shifting overlay filesystem for containers"
++	help
++	  This filesystem can overlay any mounted filesystem and shift
++	  the uid/gid the files appear at.  The idea is that
++	  unprivileged containers can use this to mount root volumes
++	  using this technique.
 +
 +config SHIFT_FS_POSIX_ACL
-+  bool "shiftfs POSIX Access Control Lists"
-+  depends on SHIFT_FS
-+  select FS_POSIX_ACL
-+  help
-+    POSIX Access Control Lists (ACLs) support permissions for users and
-+    groups beyond the owner/group/world scheme.
++	bool "shiftfs POSIX Access Control Lists"
++	depends on SHIFT_FS
++	select FS_POSIX_ACL
++	help
++	  POSIX Access Control Lists (ACLs) support permissions for users and
++	  groups beyond the owner/group/world scheme.
 +
-+    If you don't know what Access Control Lists are, say N.
++	  If you don't know what Access Control Lists are, say N.
 +
  menu "Caches"
  
