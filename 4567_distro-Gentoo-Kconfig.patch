@@ -6,8 +6,8 @@
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2021-06-08 16:56:49.698138501 -0400
-+++ b/distro/Kconfig	2021-06-08 17:11:33.377999003 -0400
+--- /dev/null	2021-07-04 10:53:51.006624416 -0400
++++ b/distro/Kconfig	2021-07-04 11:07:33.534248860 -0400
 @@ -0,0 +1,263 @@
 +menu "Gentoo Linux"
 +
@@ -172,15 +172,6 @@
 +config GENTOO_KERNEL_SELF_PROTECTION
 +	bool "Architecture Independant Kernel Self Protection Project Recommendations"
 +
-+	help
-+  	Recommended Kernel settings based on the suggestions from the Kernel Self Protection Project
-+	See: https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project/Recommended_Settings
-+	Note, there may be additional settings for which the CONFIG_ setting is invisible in menuconfig due 
-+	to unmet dependencies. Search for GENTOO_KERNEL_SELF_PROTECTION_{X86_64, ARM64, X86_32, ARM} for 
-+	dependency information on your specific architecture.
-+	Note 2: Please see the URL above for numeric settings, e.g. CONFIG_DEFAULT_MMAP_MIN_ADDR=65536 
-+	for X86_64
-+
 +	depends on GENTOO_LINUX && !ACPI_CUSTOM_METHOD && !COMPAT_BRK && !DEVKMEM && !PROC_KCORE && !COMPAT_VDSO && !KEXEC && !HIBERNATION && !LEGACY_PTYS && !X86_X32 && !MODIFY_LDT_SYSCALL
 +
 +	select BUG
@@ -188,8 +179,8 @@
 +	select DEBUG_WX
 +	select STACKPROTECTOR
 +	select STACKPROTECTOR_STRONG
-+	select STRICT_DEVMEM
-+	select IO_STRICT_DEVMEM
++	select STRICT_DEVMEM if DEVMEM=y
++	select IO_STRICT_DEVMEM if DEVMEM=y
 +	select SYN_COOKIES
 +	select DEBUG_CREDENTIALS
 +	select DEBUG_NOTIFIERS
@@ -221,6 +212,15 @@
 +	select GCC_PLUGIN_STACKLEAK
 +	select GCC_PLUGIN_RANDSTRUCT
 +	select GCC_PLUGIN_RANDSTRUCT_PERFORMANCE
++
++	help
++  		Recommended Kernel settings based on the suggestions from the Kernel Self Protection Project
++		See: https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project/Recommended_Settings
++		Note, there may be additional settings for which the CONFIG_ setting is invisible in menuconfig due 
++		to unmet dependencies. Search for GENTOO_KERNEL_SELF_PROTECTION_{X86_64, ARM64, X86_32, ARM} for 
++		dependency information on your specific architecture.
++		Note 2: Please see the URL above for numeric settings, e.g. CONFIG_DEFAULT_MMAP_MIN_ADDR=65536 
++		for X86_64
 +
 +menu "Architecture Specific Self Protection Project Recommendations"
 +
