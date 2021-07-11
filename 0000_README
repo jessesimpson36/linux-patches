@@ -247,10 +247,6 @@ Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
 Desc:   Enable link security restrictions by default.
 
-Patch:  1700_P9_save_and_restore_fscr.patch
-From:   https://github.com/torvalds/linux/commit/25edcc50d76c.patch
-Desc:   Fix qemu on P9 ppc64.
-
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
