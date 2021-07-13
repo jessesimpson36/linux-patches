@@ -600,5 +600,5 @@ From:   https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/focal
 Desc:   UID/GID shifting overlay filesystem for containe
 
 Patch:  5010_enable-cpu-optimizations-universal.patch
-From:   https://github.com/graysky2/kernel_gcc_patch/
+From:   https://github.com/graysky2/kernel_compiler_patch
 Desc:   Kernel 4.19-5.4 patch enables gcc = v9+ optimizations for additional CPUs.
