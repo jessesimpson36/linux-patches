@@ -255,10 +255,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2400_revert-ibmvnic-remove-duplicate-napi_schedule-call-i.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git/plain/queue-5.10/revert-ibmvnic-remove-duplicate-napi_schedule-call-i.patch
-Desc:   Revert ibmvnic: remove duplicate napi_schedule call in open function
-
 Patch:  2900_tmp513-Fix-build-issue-by-selecting-CONFIG_REG.patch
 From:   https://bugs.gentoo.org/710790
 Desc:   tmp513 requies REGMAP_I2C to build.  Select it by default in Kconfig. See bug #710790. Thanks to Phil Stracchino
