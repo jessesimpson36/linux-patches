@@ -138,8 +138,8 @@
 +	select NET
 +	select NET_NS
 +	select PROC_FS
-+	select SECCOMP
-+	select SECCOMP_FILTER
++ select SECCOMP if HAVE_ARCH_SECCOMP
++ select SECCOMP_FILTER if HAVE_ARCH_SECCOMP_FILTER
 +	select SIGNALFD
 +	select SYSFS
 +	select TIMERFD
