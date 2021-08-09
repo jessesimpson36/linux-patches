@@ -6,9 +6,9 @@
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2021-08-03 06:44:27.767516067 -0400
-+++ b/distro/Kconfig	2021-08-03 18:43:33.303563865 -0400
-@@ -0,0 +1,268 @@
+--- /dev/null	2021-08-09 07:18:54.945580285 -0400
++++ b/distro/Kconfig	2021-08-09 19:15:34.418191114 -0400
+@@ -0,0 +1,267 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -170,7 +170,7 @@
 +	bool "Kernel Self Protection Project"
 +	depends on GENTOO_LINUX
 +	help
-+  		Recommended Kernel settings based on the suggestions from the Kernel Self Protection Project
++		Recommended Kernel settings based on the suggestions from the Kernel Self Protection Project
 +		See: https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project/Recommended_Settings
 +		Note, there may be additional settings for which the CONFIG_ setting is invisible in menuconfig due 
 +		to unmet dependencies. Search for GENTOO_KERNEL_SELF_PROTECTION_COMMON and search for 
@@ -183,7 +183,7 @@
 +config GENTOO_KERNEL_SELF_PROTECTION_COMMON
 +	bool "Enable Kernel Self Protection Project Recommendations"
 +
-+	depends on GENTOO_LINUX && !ACPI_CUSTOM_METHOD && !COMPAT_BRK && !DEVKMEM && !PROC_KCORE && !COMPAT_VDSO && !KEXEC && !HIBERNATION && !LEGACY_PTYS && !X86_X32 && !MODIFY_LDT_SYSCALL
++	depends on GENTOO_LINUX && !ACPI_CUSTOM_METHOD && !COMPAT_BRK && !DEVKMEM && !PROC_KCORE && !COMPAT_VDSO && !KEXEC && !HIBERNATION && !LEGACY_PTYS && !X86_X32 && !MODIFY_LDT_SYSCALL && GCC_PLUGINS
 +
 +	select BUG
 +	select STRICT_KERNEL_RWX
@@ -216,7 +216,6 @@
 +	select FORTIFY_SOURCE
 +	select SECURITY_DMESG_RESTRICT
 +	select PANIC_ON_OOPS
-+	select CONFIG_GCC_PLUGINS
 +	select GCC_PLUGIN_LATENT_ENTROPY
 +	select GCC_PLUGIN_STRUCTLEAK
 +	select GCC_PLUGIN_STRUCTLEAK_BYREF_ALL
