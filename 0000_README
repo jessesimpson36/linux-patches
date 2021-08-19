@@ -295,6 +295,10 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2700_Bluetooth-usb-alt-3-for-WBS.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/bluetooth/bluetooth-next.git/commit/?id=55981d3541812234e687062926ff199c83f79a39
+Desc:   Bluetooth: btusb: check conditions before enabling USB ALT 3 for WBS
+
 Patch:  2900_tmp513-Fix-build-issue-by-selecting-CONFIG_REG.patch
 From:   https://bugs.gentoo.org/710790
 Desc:   tmp513 requies REGMAP_I2C to build.  Select it by default in Kconfig. See bug #710790. Thanks to Phil Stracchino
