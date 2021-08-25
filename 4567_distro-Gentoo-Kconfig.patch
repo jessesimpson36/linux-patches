@@ -280,7 +280,7 @@
 +	bool "Print firmware information that the kernel attempts to load"
 +
 +	depends on GENTOO_LINUX
-+	default n 
++	default y
 +
 +	help
 +		Enable this option to print information about firmware that the kernel
