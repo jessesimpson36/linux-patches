@@ -65,6 +65,7 @@
 +	select NET_NS
 +	select PID_NS
 +	select SYSVIPC
++	select USER_NS
 +	select UTS_NS
 +
 +	help
@@ -145,7 +146,6 @@
 +	select TIMERFD
 +	select TMPFS_POSIX_ACL
 +	select TMPFS_XATTR
-+	select USER_NS
 +
 +	select ANON_INODES
 +	select BLOCK
