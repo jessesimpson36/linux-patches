@@ -687,6 +687,10 @@ Patch:  2600_enable-key-swapping-for-apple-mac.patch
 From:   https://github.com/free5lot/hid-apple-patched
 Desc:   This hid-apple patch enables swapping of the FN and left Control keys and some additional on some apple keyboards. See bug #622902
 
+Patch:  2910_fix-gcc-detection-method.patch
+From:   https://bugs.gentoo.org/814200
+Desc:   Fix how gcc version is detected to make visible CONFIG_GCC_PLUGINS. Thanks to Kerin Millar.
+
 Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL

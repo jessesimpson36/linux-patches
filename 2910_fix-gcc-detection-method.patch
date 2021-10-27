@@ -1,0 +1,92 @@
+--- a/scripts/gcc-plugin.sh	2021-09-23 10:18:55.315793245 -0400
++++ /dev/null	2021-10-27 08:48:41.750968153 -0400
+@@ -1,66 +0,0 @@
+-#!/bin/sh
+-# SPDX-License-Identifier: GPL-2.0
+-srctree=$(dirname "$0")
+-
+-SHOW_ERROR=
+-if [ "$1" = "--show-error" ] ; then
+-	SHOW_ERROR=1
+-	shift || true
+-fi
+-
+-gccplugins_dir=$($3 -print-file-name=plugin)
+-plugincc=$($1 -E -x c++ - -o /dev/null -I"${srctree}"/gcc-plugins -I"${gccplugins_dir}"/include 2>&1 <<EOF
+-#include "gcc-common.h"
+-#if BUILDING_GCC_VERSION >= 4008 || defined(ENABLE_BUILD_WITH_CXX)
+-#warning $2 CXX
+-#else
+-#warning $1 CC
+-#endif
+-EOF
+-)
+-
+-if [ $? -ne 0 ]
+-then
+-	if [ -n "$SHOW_ERROR" ] ; then
+-		echo "${plugincc}" >&2
+-	fi
+-	exit 1
+-fi
+-
+-case "$plugincc" in
+-	*"$1 CC"*)
+-		echo "$1"
+-		exit 0
+-		;;
+-
+-	*"$2 CXX"*)
+-		# the c++ compiler needs another test, see below
+-		;;
+-
+-	*)
+-		exit 1
+-		;;
+-esac
+-
+-# we need a c++ compiler that supports the designated initializer GNU extension
+-plugincc=$($2 -c -x c++ -std=gnu++98 - -fsyntax-only -I"${srctree}"/gcc-plugins -I"${gccplugins_dir}"/include 2>&1 <<EOF
+-#include "gcc-common.h"
+-class test {
+-public:
+-	int test;
+-} test = {
+-	.test = 1
+-};
+-EOF
+-)
+-
+-if [ $? -eq 0 ]
+-then
+-	echo "$2"
+-	exit 0
+-fi
+-
+-if [ -n "$SHOW_ERROR" ] ; then
+-	echo "${plugincc}" >&2
+-fi
+-exit 1
+--- a/scripts/gcc-plugins/Kconfig	2021-09-23 10:15:50.898216868 -0400
++++ b/scripts/gcc-plugins/Kconfig	2021-10-27 11:44:35.700620974 -0400
+@@ -17,7 +17,8 @@ config HAVE_GCC_PLUGINS
+ menuconfig GCC_PLUGINS
+ 	bool "GCC plugins"
+ 	depends on HAVE_GCC_PLUGINS
+-	depends on PLUGIN_HOSTCC != ""
++	depends on CC_IS_GCC
++	depends on $(success,test -e $(shell,$(CC) -print-file-name=plugin)/include/plugin-version.h)
+ 	default y
+ 	help
+ 	  GCC plugins are loadable modules that provide extra features to the
+--- a/scripts/gcc-plugins/Makefile	2021-10-27 10:58:03.960272437 -0400
++++ b/scripts/gcc-plugins/Makefile	2021-10-27 10:59:37.313786319 -0400
+@@ -8,7 +8,7 @@ ifeq ($(PLUGINCC),$(HOSTCC))
+   export HOST_EXTRACFLAGS
+ else
+   HOSTLIBS := hostcxxlibs
+-  HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++98 -fno-rtti
++  HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++11 -fno-rtti
+   HOST_EXTRACXXFLAGS += -fno-exceptions -fasynchronous-unwind-tables -ggdb
+   HOST_EXTRACXXFLAGS += -Wno-narrowing -Wno-unused-variable
+   HOST_EXTRACXXFLAGS += -Wno-format-diag
