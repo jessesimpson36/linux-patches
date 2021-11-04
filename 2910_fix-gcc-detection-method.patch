@@ -1,5 +1,21 @@
---- a/scripts/gcc-plugin.sh	2021-09-23 10:18:55.315793245 -0400
-+++ /dev/null	2021-10-27 08:48:41.750968153 -0400
+From 106e2bb6f90409ca0edc77d9b7eba376d1e85876 Mon Sep 17 00:00:00 2001
+From: Kerin Millar <kfm@plushkava.net>
+Date: Thu, 4 Nov 2021 08:44:33 +0000
+Subject: [PATCH] https://bugs.gentoo.org/814200#c20
+
+Signed-off-by: Kerin Millar <kfm@plushkava.net>
+---
+ scripts/gcc-plugin.sh        | 66 ------------------------------------
+ scripts/gcc-plugins/Kconfig  | 11 ++----
+ scripts/gcc-plugins/Makefile | 19 ++++-------
+ 3 files changed, 8 insertions(+), 88 deletions(-)
+ delete mode 100755 scripts/gcc-plugin.sh
+
+diff --git a/scripts/gcc-plugin.sh b/scripts/gcc-plugin.sh
+deleted file mode 100755
+index d3caefe53eab..000000000000
+--- a/scripts/gcc-plugin.sh
++++ /dev/null
 @@ -1,66 +0,0 @@
 -#!/bin/sh
 -# SPDX-License-Identifier: GPL-2.0
@@ -67,9 +83,24 @@
 -	echo "${plugincc}" >&2
 -fi
 -exit 1
---- a/scripts/gcc-plugins/Kconfig	2021-09-23 10:15:50.898216868 -0400
-+++ b/scripts/gcc-plugins/Kconfig	2021-10-27 11:44:35.700620974 -0400
-@@ -17,7 +17,8 @@ config HAVE_GCC_PLUGINS
+diff --git a/scripts/gcc-plugins/Kconfig b/scripts/gcc-plugins/Kconfig
+index e3569543bdac..162f17ff01d3 100644
+--- a/scripts/gcc-plugins/Kconfig
++++ b/scripts/gcc-plugins/Kconfig
+@@ -1,12 +1,4 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+-preferred-plugin-hostcc := $(if-success,[ $(gcc-version) -ge 40800 ],$(HOSTCXX),$(HOSTCC))
+-
+-config PLUGIN_HOSTCC
+-	string
+-	default "$(shell,$(srctree)/scripts/gcc-plugin.sh "$(preferred-plugin-hostcc)" "$(HOSTCXX)" "$(CC)")" if CC_IS_GCC
+-	help
+-	  Host compiler used to build GCC plugins.  This can be $(HOSTCXX),
+-	  $(HOSTCC), or a null string if GCC plugin is unsupported.
+ 
+ config HAVE_GCC_PLUGINS
+ 	bool
+@@ -17,7 +9,8 @@ config HAVE_GCC_PLUGINS
  menuconfig GCC_PLUGINS
  	bool "GCC plugins"
  	depends on HAVE_GCC_PLUGINS
@@ -79,14 +110,36 @@
  	default y
  	help
  	  GCC plugins are loadable modules that provide extra features to the
---- a/scripts/gcc-plugins/Makefile	2021-10-27 10:58:03.960272437 -0400
-+++ b/scripts/gcc-plugins/Makefile	2021-10-27 10:59:37.313786319 -0400
-@@ -8,7 +8,7 @@ ifeq ($(PLUGINCC),$(HOSTCC))
-   export HOST_EXTRACFLAGS
- else
-   HOSTLIBS := hostcxxlibs
+diff --git a/scripts/gcc-plugins/Makefile b/scripts/gcc-plugins/Makefile
+index 9e95862f2788..e07236375248 100644
+--- a/scripts/gcc-plugins/Makefile
++++ b/scripts/gcc-plugins/Makefile
+@@ -1,19 +1,12 @@
+ # SPDX-License-Identifier: GPL-2.0
+-PLUGINCC := $(CONFIG_PLUGIN_HOSTCC:"%"=%)
+ GCC_PLUGINS_DIR := $(shell $(CC) -print-file-name=plugin)
+ 
+-ifeq ($(PLUGINCC),$(HOSTCC))
+-  HOSTLIBS := hostlibs
+-  HOST_EXTRACFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu99 -ggdb
+-  export HOST_EXTRACFLAGS
+-else
+-  HOSTLIBS := hostcxxlibs
 -  HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++98 -fno-rtti
-+  HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++11 -fno-rtti
-   HOST_EXTRACXXFLAGS += -fno-exceptions -fasynchronous-unwind-tables -ggdb
-   HOST_EXTRACXXFLAGS += -Wno-narrowing -Wno-unused-variable
-   HOST_EXTRACXXFLAGS += -Wno-format-diag
+-  HOST_EXTRACXXFLAGS += -fno-exceptions -fasynchronous-unwind-tables -ggdb
+-  HOST_EXTRACXXFLAGS += -Wno-narrowing -Wno-unused-variable
+-  HOST_EXTRACXXFLAGS += -Wno-format-diag
+-  export HOST_EXTRACXXFLAGS
+-endif
++HOSTLIBS := hostcxxlibs
++HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++11 -fno-rtti
++HOST_EXTRACXXFLAGS += -fno-exceptions -fasynchronous-unwind-tables -ggdb
++HOST_EXTRACXXFLAGS += -Wno-narrowing -Wno-unused-variable
++HOST_EXTRACXXFLAGS += -Wno-format-diag
++export HOST_EXTRACXXFLAGS
+ 
+ $(obj)/randomize_layout_plugin.o: $(objtree)/$(obj)/randomize_layout_seed.h
+ quiet_cmd_create_randomize_layout_seed = GENSEED $@
+-- 
+2.33.1
+
