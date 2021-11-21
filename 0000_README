@@ -83,7 +83,7 @@ Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
 
-Patch:  5020_BMQ-and-PDS-io-scheduler-v5.15-r0.patch
+Patch:  5020_BMQ-and-PDS-io-scheduler-v5.15-r1.patch
 From:   https://gitlab.com/alfredchen/linux-prjc
 Desc:   BMQ(BitMap Queue) Scheduler. A new CPU scheduler developed from PDS(incld). Inspired by the scheduler in zircon.
 
