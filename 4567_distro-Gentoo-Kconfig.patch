@@ -6,15 +6,17 @@
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2020-09-24 03:06:47.590000000 -0400
-+++ b/distro/Kconfig	2020-09-24 11:31:29.403150624 -0400
-@@ -0,0 +1,158 @@
+--- /dev/null	2022-01-31 05:39:10.702387747 -0500
++++ b/distro/Kconfig	2022-01-31 07:54:58.153689335 -0500
+@@ -0,0 +1,160 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
 +	bool "Gentoo Linux support"
 +
 +	default y
++
++	select CPU_FREQ_DEFAULT_GOV_SCHEDUTIL
 +
 +	help
 +		In order to boot Gentoo Linux a minimal set of config settings needs to
