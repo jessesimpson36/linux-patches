@@ -1,14 +1,14 @@
---- a/Kconfig	2021-06-04 19:03:33.646823432 -0400
-+++ b/Kconfig	2021-06-04 19:03:40.508892817 -0400
+--- a/Kconfig	2022-04-12 13:11:48.403113171 -0400
++++ b/Kconfig	2022-04-12 13:12:36.530084675 -0400
 @@ -30,3 +30,5 @@ source "lib/Kconfig"
  source "lib/Kconfig.debug"
  
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2022-01-29 13:28:12.679255142 -0500
-+++ b/distro/Kconfig	2022-01-29 15:29:29.800465617 -0500
-@@ -0,0 +1,285 @@
+--- /dev/null	2022-04-12 05:39:54.696333295 -0400
++++ b/distro/Kconfig	2022-04-12 13:21:04.666379519 -0400
+@@ -0,0 +1,286 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -122,6 +122,7 @@
 +	depends on GENTOO_LINUX && GENTOO_LINUX_UDEV
 +
 +	select AUTOFS4_FS
++	select AUTOFS_FS
 +	select BLK_DEV_BSG
 +	select BPF_SYSCALL
 +	select CGROUP_BPF
