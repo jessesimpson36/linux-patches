@@ -8,7 +8,7 @@
 +source "distro/Kconfig"
 --- /dev/null	2022-01-30 08:12:05.041788304 -0500
 +++ b/distro/Kconfig	2022-01-30 15:28:10.030352980 -0500
-@@ -0,0 +1,285 @@
+@@ -0,0 +1,286 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -122,6 +122,7 @@
 +	depends on GENTOO_LINUX && GENTOO_LINUX_UDEV
 +
 +	select AUTOFS4_FS
++	select AUTOFS_FS
 +	select BLK_DEV_BSG
 +	select BPF_SYSCALL
 +	select CGROUP_BPF
@@ -353,4 +354,3 @@ index 24c045b24..e13fc740c 100644
  	  This is the portion of low virtual memory which should be protected
 -- 
 2.31.1
-```
