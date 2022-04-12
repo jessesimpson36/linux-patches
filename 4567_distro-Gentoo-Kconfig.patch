@@ -121,7 +121,7 @@
 +
 +	depends on GENTOO_LINUX && GENTOO_LINUX_UDEV
 +
-+	select AUTOFS4_FS
++	select AUTOFS_FS
 +	select BLK_DEV_BSG
 +	select BPF_SYSCALL
 +	select CGROUP_BPF
