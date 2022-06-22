@@ -10504,9 +10504,9 @@ exit 0
 +$output=pop and open STDOUT,">$output";
 +print $code;
 +close STDOUT;
---- /dev/null
+--- b/include/crypto/blake2s.h
 +++ b/include/crypto/blake2s.h
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,103 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -10609,9 +10609,6 @@ exit 0
 +	blake2s_final(&state, out);
 +}
 +
-+void blake2s256_hmac(u8 *out, const u8 *in, const u8 *key, const size_t inlen,
-+		     const size_t keylen);
-+
 +#endif /* BLAKE2S_H */
 --- b/include/crypto/internal/blake2s.h
 +++ b/include/crypto/internal/blake2s.h
@@ -10640,123 +10637,9 @@ exit 0
 +}
 +
 +#endif /* BLAKE2S_INTERNAL_H */
---- /dev/null
-+++ b/lib/crypto/blake2s-generic.c
-@@ -0,0 +1,111 @@
-+// SPDX-License-Identifier: GPL-2.0 OR MIT
-+/*
-+ * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
-+ *
-+ * This is an implementation of the BLAKE2s hash and PRF functions.
-+ *
-+ * Information: https://blake2.net/
-+ *
-+ */
-+
-+#include <crypto/internal/blake2s.h>
-+#include <linux/types.h>
-+#include <linux/string.h>
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+#include <linux/init.h>
-+#include <linux/bug.h>
-+#include <asm/unaligned.h>
-+
-+static const u8 blake2s_sigma[10][16] = {
-+	{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-+	{ 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
-+	{ 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
-+	{ 7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8 },
-+	{ 9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13 },
-+	{ 2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9 },
-+	{ 12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11 },
-+	{ 13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10 },
-+	{ 6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5 },
-+	{ 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 },
-+};
-+
-+static inline void blake2s_increment_counter(struct blake2s_state *state,
-+					     const u32 inc)
-+{
-+	state->t[0] += inc;
-+	state->t[1] += (state->t[0] < inc);
-+}
-+
-+void blake2s_compress_generic(struct blake2s_state *state,const u8 *block,
-+			      size_t nblocks, const u32 inc)
-+{
-+	u32 m[16];
-+	u32 v[16];
-+	int i;
-+
-+	WARN_ON(IS_ENABLED(DEBUG) &&
-+		(nblocks > 1 && inc != BLAKE2S_BLOCK_SIZE));
-+
-+	while (nblocks > 0) {
-+		blake2s_increment_counter(state, inc);
-+		memcpy(m, block, BLAKE2S_BLOCK_SIZE);
-+		le32_to_cpu_array(m, ARRAY_SIZE(m));
-+		memcpy(v, state->h, 32);
-+		v[ 8] = BLAKE2S_IV0;
-+		v[ 9] = BLAKE2S_IV1;
-+		v[10] = BLAKE2S_IV2;
-+		v[11] = BLAKE2S_IV3;
-+		v[12] = BLAKE2S_IV4 ^ state->t[0];
-+		v[13] = BLAKE2S_IV5 ^ state->t[1];
-+		v[14] = BLAKE2S_IV6 ^ state->f[0];
-+		v[15] = BLAKE2S_IV7 ^ state->f[1];
-+
-+#define G(r, i, a, b, c, d) do { \
-+	a += b + m[blake2s_sigma[r][2 * i + 0]]; \
-+	d = ror32(d ^ a, 16); \
-+	c += d; \
-+	b = ror32(b ^ c, 12); \
-+	a += b + m[blake2s_sigma[r][2 * i + 1]]; \
-+	d = ror32(d ^ a, 8); \
-+	c += d; \
-+	b = ror32(b ^ c, 7); \
-+} while (0)
-+
-+#define ROUND(r) do { \
-+	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
-+	G(r, 1, v[1], v[ 5], v[ 9], v[13]); \
-+	G(r, 2, v[2], v[ 6], v[10], v[14]); \
-+	G(r, 3, v[3], v[ 7], v[11], v[15]); \
-+	G(r, 4, v[0], v[ 5], v[10], v[15]); \
-+	G(r, 5, v[1], v[ 6], v[11], v[12]); \
-+	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
-+	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-+} while (0)
-+		ROUND(0);
-+		ROUND(1);
-+		ROUND(2);
-+		ROUND(3);
-+		ROUND(4);
-+		ROUND(5);
-+		ROUND(6);
-+		ROUND(7);
-+		ROUND(8);
-+		ROUND(9);
-+
-+#undef G
-+#undef ROUND
-+
-+		for (i = 0; i < 8; ++i)
-+			state->h[i] ^= v[i] ^ v[i + 8];
-+
-+		block += BLAKE2S_BLOCK_SIZE;
-+		--nblocks;
-+	}
-+}
-+
-+EXPORT_SYMBOL(blake2s_compress_generic);
-+
-+MODULE_LICENSE("GPL v2");
-+MODULE_DESCRIPTION("BLAKE2s hash function");
-+MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
---- /dev/null
+--- b/lib/crypto/blake2s-selftest.c
 +++ b/lib/crypto/blake2s-selftest.c
-@@ -0,0 +1,622 @@
+@@ -0,0 +1,591 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -10774,7 +10657,6 @@ exit 0
 + * #include <stdio.h>
 + *
 + * #include <openssl/evp.h>
-+ * #include <openssl/hmac.h>
 + *
 + * #define BLAKE2S_TESTVEC_COUNT	256
 + *
@@ -10816,16 +10698,6 @@ exit 0
 + *		print_vec(hash, outlen);
 + *	}
 + *	printf("};\n\n");
-+ *
-+ *	printf("static const u8 blake2s_hmac_testvecs[][BLAKE2S_HASH_SIZE] __initconst = {\n");
-+ *
-+ *	HMAC(EVP_blake2s256(), key, sizeof(key), buf, sizeof(buf), hash, NULL);
-+ *	print_vec(hash, BLAKE2S_OUTBYTES);
-+ *
-+ *	HMAC(EVP_blake2s256(), buf, sizeof(buf), key, sizeof(key), hash, NULL);
-+ *	print_vec(hash, BLAKE2S_OUTBYTES);
-+ *
-+ *	printf("};\n");
 + *
 + *	return 0;
 + *}
@@ -11313,15 +11185,6 @@ exit 0
 +    0xd6, 0x98, 0x6b, 0x07, 0x10, 0x65, 0x52, 0x65, },
 +};
 +
-+static const u8 blake2s_hmac_testvecs[][BLAKE2S_HASH_SIZE] __initconst = {
-+  { 0xce, 0xe1, 0x57, 0x69, 0x82, 0xdc, 0xbf, 0x43, 0xad, 0x56, 0x4c, 0x70,
-+    0xed, 0x68, 0x16, 0x96, 0xcf, 0xa4, 0x73, 0xe8, 0xe8, 0xfc, 0x32, 0x79,
-+    0x08, 0x0a, 0x75, 0x82, 0xda, 0x3f, 0x05, 0x11, },
-+  { 0x77, 0x2f, 0x0c, 0x71, 0x41, 0xf4, 0x4b, 0x2b, 0xb3, 0xc6, 0xb6, 0xf9,
-+    0x60, 0xde, 0xe4, 0x52, 0x38, 0x66, 0xe8, 0xbf, 0x9b, 0x96, 0xc4, 0x9f,
-+    0x60, 0xd9, 0x24, 0x37, 0x99, 0xd6, 0xec, 0x31, },
-+};
-+
 +bool __init blake2s_selftest(void)
 +{
 +	u8 key[BLAKE2S_KEY_SIZE];
@@ -11366,22 +11229,11 @@ exit 0
 +		}
 +	}
 +
-+	if (success) {
-+		blake2s256_hmac(hash, buf, key, sizeof(buf), sizeof(key));
-+		success &= !memcmp(hash, blake2s_hmac_testvecs[0], BLAKE2S_HASH_SIZE);
-+
-+		blake2s256_hmac(hash, key, buf, sizeof(key), sizeof(buf));
-+		success &= !memcmp(hash, blake2s_hmac_testvecs[1], BLAKE2S_HASH_SIZE);
-+
-+		if (!success)
-+			pr_err("blake2s256_hmac self-test: FAIL\n");
-+	}
-+
 +	return success;
 +}
---- /dev/null
+--- b/lib/crypto/blake2s.c
 +++ b/lib/crypto/blake2s.c
-@@ -0,0 +1,126 @@
+@@ -0,0 +1,89 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -11453,43 +11305,6 @@ exit 0
 +	memzero_explicit(state, sizeof(*state));
 +}
 +EXPORT_SYMBOL(blake2s_final);
-+
-+void blake2s256_hmac(u8 *out, const u8 *in, const u8 *key, const size_t inlen,
-+		     const size_t keylen)
-+{
-+	struct blake2s_state state;
-+	u8 x_key[BLAKE2S_BLOCK_SIZE] __aligned(__alignof__(u32)) = { 0 };
-+	u8 i_hash[BLAKE2S_HASH_SIZE] __aligned(__alignof__(u32));
-+	int i;
-+
-+	if (keylen > BLAKE2S_BLOCK_SIZE) {
-+		blake2s_init(&state, BLAKE2S_HASH_SIZE);
-+		blake2s_update(&state, key, keylen);
-+		blake2s_final(&state, x_key);
-+	} else
-+		memcpy(x_key, key, keylen);
-+
-+	for (i = 0; i < BLAKE2S_BLOCK_SIZE; ++i)
-+		x_key[i] ^= 0x36;
-+
-+	blake2s_init(&state, BLAKE2S_HASH_SIZE);
-+	blake2s_update(&state, x_key, BLAKE2S_BLOCK_SIZE);
-+	blake2s_update(&state, in, inlen);
-+	blake2s_final(&state, i_hash);
-+
-+	for (i = 0; i < BLAKE2S_BLOCK_SIZE; ++i)
-+		x_key[i] ^= 0x5c ^ 0x36;
-+
-+	blake2s_init(&state, BLAKE2S_HASH_SIZE);
-+	blake2s_update(&state, x_key, BLAKE2S_BLOCK_SIZE);
-+	blake2s_update(&state, i_hash, BLAKE2S_HASH_SIZE);
-+	blake2s_final(&state, i_hash);
-+
-+	memcpy(out, i_hash, BLAKE2S_HASH_SIZE);
-+	memzero_explicit(x_key, BLAKE2S_BLOCK_SIZE);
-+	memzero_explicit(i_hash, BLAKE2S_HASH_SIZE);
-+}
-+EXPORT_SYMBOL(blake2s256_hmac);
 +
 +static int __init mod_init(void)
 +{
@@ -15654,7 +15469,7 @@ exit 0
 +MODULE_LICENSE("GPL");
 --- b/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
-@@ -0,0 +1,1512 @@
+@@ -0,0 +1,1724 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
 +/*
 + * Copyright (C) 2020 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -15668,6 +15483,7 @@ exit 0
 +#include <linux/jump_label.h>
 +#include <linux/kernel.h>
 +#include <linux/module.h>
++#include <linux/scatterlist.h>
 +
 +#include <asm/cpufeature.h>
 +#include <asm/processor.h>
@@ -15720,10 +15536,9 @@ exit 0
 +
 +		/* Return the carry bit in a register */
 +		"  adcx %%r11, %1;"
-+	: "+&r" (f2), "=&r" (carry_r)
-+	: "r" (out), "r" (f1)
-+	: "%r8", "%r9", "%r10", "%r11", "memory", "cc"
-+	);
++		: "+&r"(f2), "=&r"(carry_r)
++		: "r"(out), "r"(f1)
++		: "%r8", "%r9", "%r10", "%r11", "memory", "cc");
 +
 +	return carry_r;
 +}
@@ -15764,17 +15579,16 @@ exit 0
 +		"  cmovc %0, %%rax;"
 +		"  add %%rax, %%r8;"
 +		"  movq %%r8, 0(%1);"
-+	: "+&r" (f2)
-+	: "r" (out), "r" (f1)
-+	: "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "memory", "cc"
-+	);
++		: "+&r"(f2)
++		: "r"(out), "r"(f1)
++		: "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "memory", "cc");
 +}
 +
-+/* Computes the field substraction of two field elements */
++/* Computes the field subtraction of two field elements */
 +static inline void fsub(u64 *out, const u64 *f1, const u64 *f2)
 +{
 +	asm volatile(
-+		/* Compute the raw substraction of f1-f2 */
++		/* Compute the raw subtraction of f1-f2 */
 +		"  movq 0(%1), %%r8;"
 +		"  subq 0(%2), %%r8;"
 +		"  movq 8(%1), %%r9;"
@@ -15791,7 +15605,7 @@ exit 0
 +		"  mov $38, %%rcx;"
 +		"  cmovc %%rcx, %%rax;"
 +
-+		/* Step 2: Substract carry*38 from the original difference */
++		/* Step 2: Subtract carry*38 from the original difference */
 +		"  sub %%rax, %%r8;"
 +		"  sbb $0, %%r9;"
 +		"  sbb $0, %%r10;"
@@ -15807,10 +15621,9 @@ exit 0
 +		"  movq %%r9, 8(%0);"
 +		"  movq %%r10, 16(%0);"
 +		"  movq %%r11, 24(%0);"
-+	:
-+	: "r" (out), "r" (f1), "r" (f2)
-+	: "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "memory", "cc"
-+	);
++		:
++		: "r"(out), "r"(f1), "r"(f2)
++		: "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "memory", "cc");
 +}
 +
 +/* Computes a field multiplication: out <- f1 * f2
@@ -15818,239 +15631,400 @@ exit 0
 +static inline void fmul(u64 *out, const u64 *f1, const u64 *f2, u64 *tmp)
 +{
 +	asm volatile(
++
 +		/* Compute the raw multiplication: tmp <- src1 * src2 */
 +
 +		/* Compute src1[0] * src2 */
-+		"  movq 0(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  movq %%r8, 0(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"
++		"  movq 0(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  movq %%r8, 0(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  movq %%r10, 8(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++
 +		/* Compute src1[1] * src2 */
-+		"  movq 8(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 8(%0), %%r8;"    "  movq %%r8, 8(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 8(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 8(%2), %%r8;"
++		"  movq %%r8, 8(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 16(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[2] * src2 */
-+		"  movq 16(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 16(%0), %%r8;"   "  movq %%r8, 16(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 16(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 16(%2), %%r8;"
++		"  movq %%r8, 16(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 24(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[3] * src2 */
-+		"  movq 24(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 24(%0), %%r8;"   "  movq %%r8, 24(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%0);"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%0);"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%0);"
++		"  movq 24(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 24(%2), %%r8;"
++		"  movq %%r8, 24(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 32(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  movq %%rbx, 40(%2);"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  movq %%r14, 48(%2);"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++		"  movq %%rax, 56(%2);"
++
 +		/* Line up pointers */
-+		"  mov %0, %1;"
 +		"  mov %2, %0;"
++		"  mov %3, %2;"
 +
 +		/* Wrap the result back into the field */
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 32(%1), %%r8, %%r13;"
-+		"  xor %k3, %k3;"
-+		"  adoxq 0(%1), %%r8;"
-+		"  mulxq 40(%1), %%r9, %%rbx;"
++		"  mulxq 32(%0), %%r8, %%r13;"
++		"  xor %k1, %k1;"
++		"  adoxq 0(%0), %%r8;"
++		"  mulxq 40(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 8(%1), %%r9;"
-+		"  mulxq 48(%1), %%r10, %%r13;"
++		"  adoxq 8(%0), %%r9;"
++		"  mulxq 48(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 16(%1), %%r10;"
-+		"  mulxq 56(%1), %%r11, %%rax;"
++		"  adoxq 16(%0), %%r10;"
++		"  mulxq 56(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 24(%1), %%r11;"
-+		"  adcx %3, %%rax;"
-+		"  adox %3, %%rax;"
++		"  adoxq 24(%0), %%r11;"
++		"  adcx %1, %%rax;"
++		"  adox %1, %%rax;"
 +		"  imul %%rdx, %%rax;"
 +
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
-+		"  adcx %3, %%r9;"
-+		"  movq %%r9, 8(%0);"
-+		"  adcx %3, %%r10;"
-+		"  movq %%r10, 16(%0);"
-+		"  adcx %3, %%r11;"
-+		"  movq %%r11, 24(%0);"
++		"  adcx %1, %%r9;"
++		"  movq %%r9, 8(%2);"
++		"  adcx %1, %%r10;"
++		"  movq %%r10, 16(%2);"
++		"  adcx %1, %%r11;"
++		"  movq %%r11, 24(%2);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 0(%0);"
-+	: "+&r" (tmp), "+&r" (f1), "+&r" (out), "+&r" (f2)
-+	:
-+	: "%rax", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rbx", "%r13", "%r14", "memory", "cc"
-+	);
++		"  movq %%r8, 0(%2);"
++		: "+&r"(f1), "+&r"(f2), "+&r"(tmp)
++		: "r"(out)
++		: "%rax", "%rbx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13",
++		  "%r14", "memory", "cc");
 +}
 +
 +/* Computes two field multiplications:
-+ * out[0] <- f1[0] * f2[0]
-+ * out[1] <- f1[1] * f2[1]
-+ * Uses the 16-element buffer tmp for intermediate results. */
++ *   out[0] <- f1[0] * f2[0]
++ *   out[1] <- f1[1] * f2[1]
++ * Uses the 16-element buffer tmp for intermediate results: */
 +static inline void fmul2(u64 *out, const u64 *f1, const u64 *f2, u64 *tmp)
 +{
 +	asm volatile(
++
 +		/* Compute the raw multiplication tmp[0] <- f1[0] * f2[0] */
 +
 +		/* Compute src1[0] * src2 */
-+		"  movq 0(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  movq %%r8, 0(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"
++		"  movq 0(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  movq %%r8, 0(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  movq %%r10, 8(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++
 +		/* Compute src1[1] * src2 */
-+		"  movq 8(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 8(%0), %%r8;"    "  movq %%r8, 8(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 8(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 8(%2), %%r8;"
++		"  movq %%r8, 8(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 16(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[2] * src2 */
-+		"  movq 16(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 16(%0), %%r8;"   "  movq %%r8, 16(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 16(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 16(%2), %%r8;"
++		"  movq %%r8, 16(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 24(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[3] * src2 */
-+		"  movq 24(%1), %%rdx;"
-+		"  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"   "  adcxq 24(%0), %%r8;"   "  movq %%r8, 24(%0);"
-+		"  mulxq 8(%3), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%0);"
-+		"  mulxq 16(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%0);"    "  mov $0, %%r8;"
-+		"  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%0);"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%0);"
++		"  movq 24(%0), %%rdx;"
++		"  mulxq 0(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 24(%2), %%r8;"
++		"  movq %%r8, 24(%2);"
++		"  mulxq 8(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 32(%2);"
++		"  mulxq 16(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  movq %%rbx, 40(%2);"
++		"  mov $0, %%r8;"
++		"  mulxq 24(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  movq %%r14, 48(%2);"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++		"  movq %%rax, 56(%2);"
 +
 +		/* Compute the raw multiplication tmp[1] <- f1[1] * f2[1] */
 +
 +		/* Compute src1[0] * src2 */
-+		"  movq 32(%1), %%rdx;"
-+		"  mulxq 32(%3), %%r8, %%r9;"      "  xor %%r10d, %%r10d;"   "  movq %%r8, 64(%0);"
-+		"  mulxq 40(%3), %%r10, %%r11;"    "  adox %%r9, %%r10;"     "  movq %%r10, 72(%0);"
-+		"  mulxq 48(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-+		"  mulxq 56(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"
++		"  movq 32(%0), %%rdx;"
++		"  mulxq 32(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  movq %%r8, 64(%2);"
++		"  mulxq 40(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  movq %%r10, 72(%2);"
++		"  mulxq 48(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  mulxq 56(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++
 +		/* Compute src1[1] * src2 */
-+		"  movq 40(%1), %%rdx;"
-+		"  mulxq 32(%3), %%r8, %%r9;"      "  xor %%r10d, %%r10d;"   "  adcxq 72(%0), %%r8;"   "  movq %%r8, 72(%0);"
-+		"  mulxq 40(%3), %%r10, %%r11;"    "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 80(%0);"
-+		"  mulxq 48(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 56(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 40(%0), %%rdx;"
++		"  mulxq 32(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 72(%2), %%r8;"
++		"  movq %%r8, 72(%2);"
++		"  mulxq 40(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 80(%2);"
++		"  mulxq 48(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 56(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[2] * src2 */
-+		"  movq 48(%1), %%rdx;"
-+		"  mulxq 32(%3), %%r8, %%r9;"      "  xor %%r10d, %%r10d;"   "  adcxq 80(%0), %%r8;"   "  movq %%r8, 80(%0);"
-+		"  mulxq 40(%3), %%r10, %%r11;"    "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 88(%0);"
-+		"  mulxq 48(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-+		"  mulxq 56(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
++		"  movq 48(%0), %%rdx;"
++		"  mulxq 32(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 80(%2), %%r8;"
++		"  movq %%r8, 80(%2);"
++		"  mulxq 40(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 88(%2);"
++		"  mulxq 48(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  mov $0, %%r8;"
++		"  mulxq 56(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++
 +		/* Compute src1[3] * src2 */
-+		"  movq 56(%1), %%rdx;"
-+		"  mulxq 32(%3), %%r8, %%r9;"      "  xor %%r10d, %%r10d;"   "  adcxq 88(%0), %%r8;"   "  movq %%r8, 88(%0);"
-+		"  mulxq 40(%3), %%r10, %%r11;"    "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 96(%0);"
-+		"  mulxq 48(%3), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 104(%0);"    "  mov $0, %%r8;"
-+		"  mulxq 56(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 112(%0);"    "  mov $0, %%rax;"
-+		                                   "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 120(%0);"
++		"  movq 56(%0), %%rdx;"
++		"  mulxq 32(%1), %%r8, %%r9;"
++		"  xor %%r10d, %%r10d;"
++		"  adcxq 88(%2), %%r8;"
++		"  movq %%r8, 88(%2);"
++		"  mulxq 40(%1), %%r10, %%r11;"
++		"  adox %%r9, %%r10;"
++		"  adcx %%rbx, %%r10;"
++		"  movq %%r10, 96(%2);"
++		"  mulxq 48(%1), %%rbx, %%r13;"
++		"  adox %%r11, %%rbx;"
++		"  adcx %%r14, %%rbx;"
++		"  movq %%rbx, 104(%2);"
++		"  mov $0, %%r8;"
++		"  mulxq 56(%1), %%r14, %%rdx;"
++		"  adox %%r13, %%r14;"
++		"  adcx %%rax, %%r14;"
++		"  movq %%r14, 112(%2);"
++		"  mov $0, %%rax;"
++		"  adox %%rdx, %%rax;"
++		"  adcx %%r8, %%rax;"
++		"  movq %%rax, 120(%2);"
++
 +		/* Line up pointers */
-+		"  mov %0, %1;"
 +		"  mov %2, %0;"
++		"  mov %3, %2;"
 +
 +		/* Wrap the results back into the field */
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 32(%1), %%r8, %%r13;"
-+		"  xor %k3, %k3;"
-+		"  adoxq 0(%1), %%r8;"
-+		"  mulxq 40(%1), %%r9, %%rbx;"
++		"  mulxq 32(%0), %%r8, %%r13;"
++		"  xor %k1, %k1;"
++		"  adoxq 0(%0), %%r8;"
++		"  mulxq 40(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 8(%1), %%r9;"
-+		"  mulxq 48(%1), %%r10, %%r13;"
++		"  adoxq 8(%0), %%r9;"
++		"  mulxq 48(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 16(%1), %%r10;"
-+		"  mulxq 56(%1), %%r11, %%rax;"
++		"  adoxq 16(%0), %%r10;"
++		"  mulxq 56(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 24(%1), %%r11;"
-+		"  adcx %3, %%rax;"
-+		"  adox %3, %%rax;"
++		"  adoxq 24(%0), %%r11;"
++		"  adcx %1, %%rax;"
++		"  adox %1, %%rax;"
 +		"  imul %%rdx, %%rax;"
 +
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
-+		"  adcx %3, %%r9;"
-+		"  movq %%r9, 8(%0);"
-+		"  adcx %3, %%r10;"
-+		"  movq %%r10, 16(%0);"
-+		"  adcx %3, %%r11;"
-+		"  movq %%r11, 24(%0);"
++		"  adcx %1, %%r9;"
++		"  movq %%r9, 8(%2);"
++		"  adcx %1, %%r10;"
++		"  movq %%r10, 16(%2);"
++		"  adcx %1, %%r11;"
++		"  movq %%r11, 24(%2);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 0(%0);"
++		"  movq %%r8, 0(%2);"
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 96(%1), %%r8, %%r13;"
-+		"  xor %k3, %k3;"
-+		"  adoxq 64(%1), %%r8;"
-+		"  mulxq 104(%1), %%r9, %%rbx;"
++		"  mulxq 96(%0), %%r8, %%r13;"
++		"  xor %k1, %k1;"
++		"  adoxq 64(%0), %%r8;"
++		"  mulxq 104(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 72(%1), %%r9;"
-+		"  mulxq 112(%1), %%r10, %%r13;"
++		"  adoxq 72(%0), %%r9;"
++		"  mulxq 112(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 80(%1), %%r10;"
-+		"  mulxq 120(%1), %%r11, %%rax;"
++		"  adoxq 80(%0), %%r10;"
++		"  mulxq 120(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 88(%1), %%r11;"
-+		"  adcx %3, %%rax;"
-+		"  adox %3, %%rax;"
++		"  adoxq 88(%0), %%r11;"
++		"  adcx %1, %%rax;"
++		"  adox %1, %%rax;"
 +		"  imul %%rdx, %%rax;"
 +
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
-+		"  adcx %3, %%r9;"
-+		"  movq %%r9, 40(%0);"
-+		"  adcx %3, %%r10;"
-+		"  movq %%r10, 48(%0);"
-+		"  adcx %3, %%r11;"
-+		"  movq %%r11, 56(%0);"
++		"  adcx %1, %%r9;"
++		"  movq %%r9, 40(%2);"
++		"  adcx %1, %%r10;"
++		"  movq %%r10, 48(%2);"
++		"  adcx %1, %%r11;"
++		"  movq %%r11, 56(%2);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 32(%0);"
-+	: "+&r" (tmp), "+&r" (f1), "+&r" (out), "+&r" (f2)
-+	:
-+	: "%rax", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rbx", "%r13", "%r14", "memory", "cc"
-+	);
++		"  movq %%r8, 32(%2);"
++		: "+&r"(f1), "+&r"(f2), "+&r"(tmp)
++		: "r"(out)
++		: "%rax", "%rbx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13",
++		  "%r14", "memory", "cc");
 +}
 +
-+/* Computes the field multiplication of four-element f1 with value in f2 */
++/* Computes the field multiplication of four-element f1 with value in f2
++ * Requires f2 to be smaller than 2^17 */
 +static inline void fmul_scalar(u64 *out, const u64 *f1, u64 f2)
 +{
 +	register u64 f2_r asm("rdx") = f2;
 +
 +	asm volatile(
 +		/* Compute the raw multiplication of f1*f2 */
-+		"  mulxq 0(%2), %%r8, %%rcx;"      /* f1[0]*f2 */
-+		"  mulxq 8(%2), %%r9, %%rbx;"      /* f1[1]*f2 */
++		"  mulxq 0(%2), %%r8, %%rcx;" /* f1[0]*f2 */
++		"  mulxq 8(%2), %%r9, %%rbx;" /* f1[1]*f2 */
 +		"  add %%rcx, %%r9;"
 +		"  mov $0, %%rcx;"
-+		"  mulxq 16(%2), %%r10, %%r13;"    /* f1[2]*f2 */
++		"  mulxq 16(%2), %%r10, %%r13;" /* f1[2]*f2 */
 +		"  adcx %%rbx, %%r10;"
-+		"  mulxq 24(%2), %%r11, %%rax;"    /* f1[3]*f2 */
++		"  mulxq 24(%2), %%r11, %%rax;" /* f1[3]*f2 */
 +		"  adcx %%r13, %%r11;"
 +		"  adcx %%rcx, %%rax;"
 +
@@ -16074,17 +16048,17 @@ exit 0
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
 +		"  movq %%r8, 0(%1);"
-+	: "+&r" (f2_r)
-+	: "r" (out), "r" (f1)
-+	: "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "%rbx", "%r13", "memory", "cc"
-+	);
++		: "+&r"(f2_r)
++		: "r"(out), "r"(f1)
++		: "%rax", "%rbx", "%rcx", "%r8", "%r9", "%r10", "%r11", "%r13",
++		  "memory", "cc");
 +}
 +
 +/* Computes p1 <- bit ? p2 : p1 in constant time */
 +static inline void cswap2(u64 bit, const u64 *p1, const u64 *p2)
 +{
 +	asm volatile(
-+		/* Invert the polarity of bit to match cmov expectations */
++		/* Transfer bit into CF flag */
 +		"  add $18446744073709551615, %0;"
 +
 +		/* cswap p1[0], p2[0] */
@@ -16158,10 +16132,9 @@ exit 0
 +		"  cmovc %%r10, %%r9;"
 +		"  movq %%r8, 56(%1);"
 +		"  movq %%r9, 56(%2);"
-+	: "+&r" (bit)
-+	: "r" (p1), "r" (p2)
-+	: "%r8", "%r9", "%r10", "memory", "cc"
-+	);
++		: "+&r"(bit)
++		: "r"(p1), "r"(p2)
++		: "%r8", "%r9", "%r10", "memory", "cc");
 +}
 +
 +/* Computes the square of a field element: out <- f * f
@@ -16172,15 +16145,22 @@ exit 0
 +		/* Compute the raw multiplication: tmp <- f * f */
 +
 +		/* Step 1: Compute all partial products */
-+		"  movq 0(%1), %%rdx;"                                       /* f[0] */
-+		"  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"   /* f[1]*f[0] */
-+		"  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     /* f[2]*f[0] */
-+		"  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    /* f[3]*f[0] */
-+		"  movq 24(%1), %%rdx;"                                      /* f[3] */
-+		"  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    /* f[1]*f[3] */
-+		"  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    /* f[2]*f[3] */
-+		"  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    /* f1 */
-+		"  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        /* f[2]*f[1] */
++		"  movq 0(%0), %%rdx;" /* f[0] */
++		"  mulxq 8(%0), %%r8, %%r14;"
++		"  xor %%r15d, %%r15d;" /* f[1]*f[0] */
++		"  mulxq 16(%0), %%r9, %%r10;"
++		"  adcx %%r14, %%r9;" /* f[2]*f[0] */
++		"  mulxq 24(%0), %%rax, %%rcx;"
++		"  adcx %%rax, %%r10;" /* f[3]*f[0] */
++		"  movq 24(%0), %%rdx;" /* f[3] */
++		"  mulxq 8(%0), %%r11, %%rbx;"
++		"  adcx %%rcx, %%r11;" /* f[1]*f[3] */
++		"  mulxq 16(%0), %%rax, %%r13;"
++		"  adcx %%rax, %%rbx;" /* f[2]*f[3] */
++		"  movq 8(%0), %%rdx;"
++		"  adcx %%r15, %%r13;" /* f1 */
++		"  mulxq 16(%0), %%rax, %%rcx;"
++		"  mov $0, %%r14;" /* f[2]*f[1] */
 +
 +		/* Step 2: Compute two parallel carry chains */
 +		"  xor %%r15d, %%r15d;"
@@ -16198,39 +16178,50 @@ exit 0
 +		"  adcx %%r14, %%r14;"
 +
 +		/* Step 3: Compute intermediate squares */
-+		"  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[0]^2 */
-+		                           "  movq %%rax, 0(%0);"
-+		"  add %%rcx, %%r8;"       "  movq %%r8, 8(%0);"
-+		"  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[1]^2 */
-+		"  adcx %%rax, %%r9;"      "  movq %%r9, 16(%0);"
-+		"  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%0);"
-+		"  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[2]^2 */
-+		"  adcx %%rax, %%r11;"     "  movq %%r11, 32(%0);"
-+		"  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%0);"
-+		"  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[3]^2 */
-+		"  adcx %%rax, %%r13;"     "  movq %%r13, 48(%0);"
-+		"  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%0);"
++		"  movq 0(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[0]^2 */
++		"  movq %%rax, 0(%1);"
++		"  add %%rcx, %%r8;"
++		"  movq %%r8, 8(%1);"
++		"  movq 8(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[1]^2 */
++		"  adcx %%rax, %%r9;"
++		"  movq %%r9, 16(%1);"
++		"  adcx %%rcx, %%r10;"
++		"  movq %%r10, 24(%1);"
++		"  movq 16(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[2]^2 */
++		"  adcx %%rax, %%r11;"
++		"  movq %%r11, 32(%1);"
++		"  adcx %%rcx, %%rbx;"
++		"  movq %%rbx, 40(%1);"
++		"  movq 24(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[3]^2 */
++		"  adcx %%rax, %%r13;"
++		"  movq %%r13, 48(%1);"
++		"  adcx %%rcx, %%r14;"
++		"  movq %%r14, 56(%1);"
 +
 +		/* Line up pointers */
-+		"  mov %0, %1;"
-+		"  mov %2, %0;"
++		"  mov %1, %0;"
++		"  mov %2, %1;"
 +
 +		/* Wrap the result back into the field */
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 32(%1), %%r8, %%r13;"
++		"  mulxq 32(%0), %%r8, %%r13;"
 +		"  xor %%ecx, %%ecx;"
-+		"  adoxq 0(%1), %%r8;"
-+		"  mulxq 40(%1), %%r9, %%rbx;"
++		"  adoxq 0(%0), %%r8;"
++		"  mulxq 40(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 8(%1), %%r9;"
-+		"  mulxq 48(%1), %%r10, %%r13;"
++		"  adoxq 8(%0), %%r9;"
++		"  mulxq 48(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 16(%1), %%r10;"
-+		"  mulxq 56(%1), %%r11, %%rax;"
++		"  adoxq 16(%0), %%r10;"
++		"  mulxq 56(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 24(%1), %%r11;"
++		"  adoxq 24(%0), %%r11;"
 +		"  adcx %%rcx, %%rax;"
 +		"  adox %%rcx, %%rax;"
 +		"  imul %%rdx, %%rax;"
@@ -16238,40 +16229,47 @@ exit 0
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
 +		"  adcx %%rcx, %%r9;"
-+		"  movq %%r9, 8(%0);"
++		"  movq %%r9, 8(%1);"
 +		"  adcx %%rcx, %%r10;"
-+		"  movq %%r10, 16(%0);"
++		"  movq %%r10, 16(%1);"
 +		"  adcx %%rcx, %%r11;"
-+		"  movq %%r11, 24(%0);"
++		"  movq %%r11, 24(%1);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 0(%0);"
-+	: "+&r" (tmp), "+&r" (f), "+&r" (out)
-+	:
-+	: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rbx", "%r13", "%r14", "%r15", "memory", "cc"
-+	);
++		"  movq %%r8, 0(%1);"
++		: "+&r"(f), "+&r"(tmp)
++		: "r"(out)
++		: "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11",
++		  "%r13", "%r14", "%r15", "memory", "cc");
 +}
 +
 +/* Computes two field squarings:
-+ * out[0] <- f[0] * f[0]
-+ * out[1] <- f[1] * f[1]
++ *   out[0] <- f[0] * f[0]
++ *   out[1] <- f[1] * f[1]
 + * Uses the 16-element buffer tmp for intermediate results */
 +static inline void fsqr2(u64 *out, const u64 *f, u64 *tmp)
 +{
 +	asm volatile(
 +		/* Step 1: Compute all partial products */
-+		"  movq 0(%1), %%rdx;"                                       /* f[0] */
-+		"  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"   /* f[1]*f[0] */
-+		"  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     /* f[2]*f[0] */
-+		"  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    /* f[3]*f[0] */
-+		"  movq 24(%1), %%rdx;"                                      /* f[3] */
-+		"  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    /* f[1]*f[3] */
-+		"  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    /* f[2]*f[3] */
-+		"  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    /* f1 */
-+		"  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        /* f[2]*f[1] */
++		"  movq 0(%0), %%rdx;" /* f[0] */
++		"  mulxq 8(%0), %%r8, %%r14;"
++		"  xor %%r15d, %%r15d;" /* f[1]*f[0] */
++		"  mulxq 16(%0), %%r9, %%r10;"
++		"  adcx %%r14, %%r9;" /* f[2]*f[0] */
++		"  mulxq 24(%0), %%rax, %%rcx;"
++		"  adcx %%rax, %%r10;" /* f[3]*f[0] */
++		"  movq 24(%0), %%rdx;" /* f[3] */
++		"  mulxq 8(%0), %%r11, %%rbx;"
++		"  adcx %%rcx, %%r11;" /* f[1]*f[3] */
++		"  mulxq 16(%0), %%rax, %%r13;"
++		"  adcx %%rax, %%rbx;" /* f[2]*f[3] */
++		"  movq 8(%0), %%rdx;"
++		"  adcx %%r15, %%r13;" /* f1 */
++		"  mulxq 16(%0), %%rax, %%rcx;"
++		"  mov $0, %%r14;" /* f[2]*f[1] */
 +
 +		/* Step 2: Compute two parallel carry chains */
 +		"  xor %%r15d, %%r15d;"
@@ -16289,29 +16287,47 @@ exit 0
 +		"  adcx %%r14, %%r14;"
 +
 +		/* Step 3: Compute intermediate squares */
-+		"  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[0]^2 */
-+		                           "  movq %%rax, 0(%0);"
-+		"  add %%rcx, %%r8;"       "  movq %%r8, 8(%0);"
-+		"  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[1]^2 */
-+		"  adcx %%rax, %%r9;"      "  movq %%r9, 16(%0);"
-+		"  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%0);"
-+		"  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[2]^2 */
-+		"  adcx %%rax, %%r11;"     "  movq %%r11, 32(%0);"
-+		"  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%0);"
-+		"  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[3]^2 */
-+		"  adcx %%rax, %%r13;"     "  movq %%r13, 48(%0);"
-+		"  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%0);"
++		"  movq 0(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[0]^2 */
++		"  movq %%rax, 0(%1);"
++		"  add %%rcx, %%r8;"
++		"  movq %%r8, 8(%1);"
++		"  movq 8(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[1]^2 */
++		"  adcx %%rax, %%r9;"
++		"  movq %%r9, 16(%1);"
++		"  adcx %%rcx, %%r10;"
++		"  movq %%r10, 24(%1);"
++		"  movq 16(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[2]^2 */
++		"  adcx %%rax, %%r11;"
++		"  movq %%r11, 32(%1);"
++		"  adcx %%rcx, %%rbx;"
++		"  movq %%rbx, 40(%1);"
++		"  movq 24(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[3]^2 */
++		"  adcx %%rax, %%r13;"
++		"  movq %%r13, 48(%1);"
++		"  adcx %%rcx, %%r14;"
++		"  movq %%r14, 56(%1);"
 +
 +		/* Step 1: Compute all partial products */
-+		"  movq 32(%1), %%rdx;"                                       /* f[0] */
-+		"  mulxq 40(%1), %%r8, %%r14;"     "  xor %%r15d, %%r15d;"   /* f[1]*f[0] */
-+		"  mulxq 48(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     /* f[2]*f[0] */
-+		"  mulxq 56(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    /* f[3]*f[0] */
-+		"  movq 56(%1), %%rdx;"                                      /* f[3] */
-+		"  mulxq 40(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    /* f[1]*f[3] */
-+		"  mulxq 48(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    /* f[2]*f[3] */
-+		"  movq 40(%1), %%rdx;"             "  adcx %%r15, %%r13;"    /* f1 */
-+		"  mulxq 48(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        /* f[2]*f[1] */
++		"  movq 32(%0), %%rdx;" /* f[0] */
++		"  mulxq 40(%0), %%r8, %%r14;"
++		"  xor %%r15d, %%r15d;" /* f[1]*f[0] */
++		"  mulxq 48(%0), %%r9, %%r10;"
++		"  adcx %%r14, %%r9;" /* f[2]*f[0] */
++		"  mulxq 56(%0), %%rax, %%rcx;"
++		"  adcx %%rax, %%r10;" /* f[3]*f[0] */
++		"  movq 56(%0), %%rdx;" /* f[3] */
++		"  mulxq 40(%0), %%r11, %%rbx;"
++		"  adcx %%rcx, %%r11;" /* f[1]*f[3] */
++		"  mulxq 48(%0), %%rax, %%r13;"
++		"  adcx %%rax, %%rbx;" /* f[2]*f[3] */
++		"  movq 40(%0), %%rdx;"
++		"  adcx %%r15, %%r13;" /* f1 */
++		"  mulxq 48(%0), %%rax, %%rcx;"
++		"  mov $0, %%r14;" /* f[2]*f[1] */
 +
 +		/* Step 2: Compute two parallel carry chains */
 +		"  xor %%r15d, %%r15d;"
@@ -16329,37 +16345,48 @@ exit 0
 +		"  adcx %%r14, %%r14;"
 +
 +		/* Step 3: Compute intermediate squares */
-+		"  movq 32(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[0]^2 */
-+		                           "  movq %%rax, 64(%0);"
-+		"  add %%rcx, %%r8;"       "  movq %%r8, 72(%0);"
-+		"  movq 40(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    /* f[1]^2 */
-+		"  adcx %%rax, %%r9;"      "  movq %%r9, 80(%0);"
-+		"  adcx %%rcx, %%r10;"     "  movq %%r10, 88(%0);"
-+		"  movq 48(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[2]^2 */
-+		"  adcx %%rax, %%r11;"     "  movq %%r11, 96(%0);"
-+		"  adcx %%rcx, %%rbx;"     "  movq %%rbx, 104(%0);"
-+		"  movq 56(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    /* f[3]^2 */
-+		"  adcx %%rax, %%r13;"     "  movq %%r13, 112(%0);"
-+		"  adcx %%rcx, %%r14;"     "  movq %%r14, 120(%0);"
++		"  movq 32(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[0]^2 */
++		"  movq %%rax, 64(%1);"
++		"  add %%rcx, %%r8;"
++		"  movq %%r8, 72(%1);"
++		"  movq 40(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[1]^2 */
++		"  adcx %%rax, %%r9;"
++		"  movq %%r9, 80(%1);"
++		"  adcx %%rcx, %%r10;"
++		"  movq %%r10, 88(%1);"
++		"  movq 48(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[2]^2 */
++		"  adcx %%rax, %%r11;"
++		"  movq %%r11, 96(%1);"
++		"  adcx %%rcx, %%rbx;"
++		"  movq %%rbx, 104(%1);"
++		"  movq 56(%0), %%rdx;"
++		"  mulx %%rdx, %%rax, %%rcx;" /* f[3]^2 */
++		"  adcx %%rax, %%r13;"
++		"  movq %%r13, 112(%1);"
++		"  adcx %%rcx, %%r14;"
++		"  movq %%r14, 120(%1);"
 +
 +		/* Line up pointers */
-+		"  mov %0, %1;"
-+		"  mov %2, %0;"
++		"  mov %1, %0;"
++		"  mov %2, %1;"
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 32(%1), %%r8, %%r13;"
++		"  mulxq 32(%0), %%r8, %%r13;"
 +		"  xor %%ecx, %%ecx;"
-+		"  adoxq 0(%1), %%r8;"
-+		"  mulxq 40(%1), %%r9, %%rbx;"
++		"  adoxq 0(%0), %%r8;"
++		"  mulxq 40(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 8(%1), %%r9;"
-+		"  mulxq 48(%1), %%r10, %%r13;"
++		"  adoxq 8(%0), %%r9;"
++		"  mulxq 48(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 16(%1), %%r10;"
-+		"  mulxq 56(%1), %%r11, %%rax;"
++		"  adoxq 16(%0), %%r10;"
++		"  mulxq 56(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 24(%1), %%r11;"
++		"  adoxq 24(%0), %%r11;"
 +		"  adcx %%rcx, %%rax;"
 +		"  adox %%rcx, %%rax;"
 +		"  imul %%rdx, %%rax;"
@@ -16367,32 +16394,32 @@ exit 0
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
 +		"  adcx %%rcx, %%r9;"
-+		"  movq %%r9, 8(%0);"
++		"  movq %%r9, 8(%1);"
 +		"  adcx %%rcx, %%r10;"
-+		"  movq %%r10, 16(%0);"
++		"  movq %%r10, 16(%1);"
 +		"  adcx %%rcx, %%r11;"
-+		"  movq %%r11, 24(%0);"
++		"  movq %%r11, 24(%1);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 0(%0);"
++		"  movq %%r8, 0(%1);"
 +
 +		/* Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo */
 +		"  mov $38, %%rdx;"
-+		"  mulxq 96(%1), %%r8, %%r13;"
++		"  mulxq 96(%0), %%r8, %%r13;"
 +		"  xor %%ecx, %%ecx;"
-+		"  adoxq 64(%1), %%r8;"
-+		"  mulxq 104(%1), %%r9, %%rbx;"
++		"  adoxq 64(%0), %%r8;"
++		"  mulxq 104(%0), %%r9, %%rbx;"
 +		"  adcx %%r13, %%r9;"
-+		"  adoxq 72(%1), %%r9;"
-+		"  mulxq 112(%1), %%r10, %%r13;"
++		"  adoxq 72(%0), %%r9;"
++		"  mulxq 112(%0), %%r10, %%r13;"
 +		"  adcx %%rbx, %%r10;"
-+		"  adoxq 80(%1), %%r10;"
-+		"  mulxq 120(%1), %%r11, %%rax;"
++		"  adoxq 80(%0), %%r10;"
++		"  mulxq 120(%0), %%r11, %%rax;"
 +		"  adcx %%r13, %%r11;"
-+		"  adoxq 88(%1), %%r11;"
++		"  adoxq 88(%0), %%r11;"
 +		"  adcx %%rcx, %%rax;"
 +		"  adox %%rcx, %%rax;"
 +		"  imul %%rdx, %%rax;"
@@ -16400,21 +16427,21 @@ exit 0
 +		/* Step 2: Fold the carry back into dst */
 +		"  add %%rax, %%r8;"
 +		"  adcx %%rcx, %%r9;"
-+		"  movq %%r9, 40(%0);"
++		"  movq %%r9, 40(%1);"
 +		"  adcx %%rcx, %%r10;"
-+		"  movq %%r10, 48(%0);"
++		"  movq %%r10, 48(%1);"
 +		"  adcx %%rcx, %%r11;"
-+		"  movq %%r11, 56(%0);"
++		"  movq %%r11, 56(%1);"
 +
 +		/* Step 3: Fold the carry bit back in; guaranteed not to carry at this point */
 +		"  mov $0, %%rax;"
 +		"  cmovc %%rdx, %%rax;"
 +		"  add %%rax, %%r8;"
-+		"  movq %%r8, 32(%0);"
-+	: "+&r" (tmp), "+&r" (f), "+&r" (out)
-+	:
-+	: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rbx", "%r13", "%r14", "%r15", "memory", "cc"
-+	);
++		"  movq %%r8, 32(%1);"
++		: "+&r"(f), "+&r"(tmp)
++		: "r"(out)
++		: "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11",
++		  "%r13", "%r14", "%r15", "memory", "cc");
 +}
 +
 +static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
@@ -17156,7 +17183,7 @@ exit 0
 +static void __exit curve25519_mod_exit(void)
 +{
 +	if (IS_REACHABLE(CONFIG_CRYPTO_KPP) &&
-+	    (boot_cpu_has(X86_FEATURE_BMI2) || boot_cpu_has(X86_FEATURE_ADX)))
++	    static_branch_likely(&curve25519_use_bmi2_adx))
 +		crypto_unregister_kpp(&curve25519_alg);
 +}
 +
@@ -36707,7 +36734,7 @@ exit 0
 +	return exact;
 +}
 +
-+static inline void connect_node(struct allowedips_node **parent, u8 bit, struct allowedips_node *node)
++static inline void connect_node(struct allowedips_node __rcu **parent, u8 bit, struct allowedips_node *node)
 +{
 +	node->parent_bit_packed = (unsigned long)parent | bit;
 +	rcu_assign_pointer(*parent, node);
@@ -37293,7 +37320,7 @@ exit 0
 +#endif /* _WG_COOKIE_H */
 --- b/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
-@@ -0,0 +1,457 @@
+@@ -0,0 +1,461 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -37315,6 +37342,7 @@ exit 0
 +#include <linux/if_arp.h>
 +#include <linux/icmp.h>
 +#include <linux/suspend.h>
++#include <net/dst_metadata.h>
 +#include <net/icmp.h>
 +#include <net/rtnetlink.h>
 +#include <net/ip_tunnels.h>
@@ -37394,6 +37422,7 @@ exit 0
 +{
 +	struct wg_device *wg = netdev_priv(dev);
 +	struct wg_peer *peer;
++	struct sk_buff *skb;
 +
 +	mutex_lock(&wg->device_update_lock);
 +	list_for_each_entry(peer, &wg->peer_list, peer_list) {
@@ -37404,7 +37433,9 @@ exit 0
 +		wg_noise_reset_last_sent_handshake(&peer->last_sent_handshake);
 +	}
 +	mutex_unlock(&wg->device_update_lock);
-+	skb_queue_purge(&wg->incoming_handshakes);
++	while ((skb = ptr_ring_consume(&wg->handshake_queue.ring)) != NULL)
++		kfree_skb(skb);
++	atomic_set(&wg->handshake_queue_len, 0);
 +	wg_socket_reinit(wg, NULL, NULL);
 +	return 0;
 +}
@@ -37445,7 +37476,7 @@ exit 0
 +		goto err_peer;
 +	}
 +
-+	mtu = skb_dst(skb) ? dst_mtu(skb_dst(skb)) : dev->mtu;
++	mtu = skb_valid_dst(skb) ? dst_mtu(skb_dst(skb)) : dev->mtu;
 +
 +	__skb_queue_head_init(&packets);
 +	if (!skb_is_gso(skb)) {
@@ -37531,14 +37562,13 @@ exit 0
 +	destroy_workqueue(wg->handshake_receive_wq);
 +	destroy_workqueue(wg->handshake_send_wq);
 +	destroy_workqueue(wg->packet_crypt_wq);
-+	wg_packet_queue_free(&wg->decrypt_queue);
-+	wg_packet_queue_free(&wg->encrypt_queue);
++	wg_packet_queue_free(&wg->handshake_queue, true);
++	wg_packet_queue_free(&wg->decrypt_queue, false);
++	wg_packet_queue_free(&wg->encrypt_queue, false);
 +	rcu_barrier(); /* Wait for all the peers to be actually freed. */
 +	wg_ratelimiter_uninit();
 +	memzero_explicit(&wg->static_identity, sizeof(wg->static_identity));
-+	skb_queue_purge(&wg->incoming_handshakes);
 +	free_percpu(dev->tstats);
-+	free_percpu(wg->incoming_handshakes_worker);
 +	kvfree(wg->index_hashtable);
 +	kvfree(wg->peer_hashtable);
 +	mutex_unlock(&wg->device_update_lock);
@@ -37594,7 +37624,6 @@ exit 0
 +	init_rwsem(&wg->static_identity.lock);
 +	mutex_init(&wg->socket_update_lock);
 +	mutex_init(&wg->device_update_lock);
-+	skb_queue_head_init(&wg->incoming_handshakes);
 +	wg_allowedips_init(&wg->peer_allowedips);
 +	wg_cookie_checker_init(&wg->cookie_checker, wg);
 +	INIT_LIST_HEAD(&wg->peer_list);
@@ -37612,16 +37641,10 @@ exit 0
 +	if (!dev->tstats)
 +		goto err_free_index_hashtable;
 +
-+	wg->incoming_handshakes_worker =
-+		wg_packet_percpu_multicore_worker_alloc(
-+				wg_packet_handshake_receive_worker, wg);
-+	if (!wg->incoming_handshakes_worker)
-+		goto err_free_tstats;
-+
 +	wg->handshake_receive_wq = alloc_workqueue("wg-kex-%s",
 +			WQ_CPU_INTENSIVE | WQ_FREEZABLE, 0, dev->name);
 +	if (!wg->handshake_receive_wq)
-+		goto err_free_incoming_handshakes;
++		goto err_free_tstats;
 +
 +	wg->handshake_send_wq = alloc_workqueue("wg-kex-%s",
 +			WQ_UNBOUND | WQ_FREEZABLE, 0, dev->name);
@@ -37643,9 +37666,14 @@ exit 0
 +	if (ret < 0)
 +		goto err_free_encrypt_queue;
 +
-+	ret = wg_ratelimiter_init();
++	ret = wg_packet_queue_init(&wg->handshake_queue, wg_packet_handshake_receive_worker,
++				   MAX_QUEUED_INCOMING_HANDSHAKES);
 +	if (ret < 0)
 +		goto err_free_decrypt_queue;
++
++	ret = wg_ratelimiter_init();
++	if (ret < 0)
++		goto err_free_handshake_queue;
 +
 +	ret = register_netdevice(dev);
 +	if (ret < 0)
@@ -37663,18 +37691,18 @@ exit 0
 +
 +err_uninit_ratelimiter:
 +	wg_ratelimiter_uninit();
++err_free_handshake_queue:
++	wg_packet_queue_free(&wg->handshake_queue, false);
 +err_free_decrypt_queue:
-+	wg_packet_queue_free(&wg->decrypt_queue);
++	wg_packet_queue_free(&wg->decrypt_queue, false);
 +err_free_encrypt_queue:
-+	wg_packet_queue_free(&wg->encrypt_queue);
++	wg_packet_queue_free(&wg->encrypt_queue, false);
 +err_destroy_packet_crypt:
 +	destroy_workqueue(wg->packet_crypt_wq);
 +err_destroy_handshake_send:
 +	destroy_workqueue(wg->handshake_send_wq);
 +err_destroy_handshake_receive:
 +	destroy_workqueue(wg->handshake_receive_wq);
-+err_free_incoming_handshakes:
-+	free_percpu(wg->incoming_handshakes_worker);
 +err_free_tstats:
 +	free_percpu(dev->tstats);
 +err_free_index_hashtable:
@@ -37694,6 +37722,7 @@ exit 0
 +static void wg_netns_pre_exit(struct net *net)
 +{
 +	struct wg_device *wg;
++	struct wg_peer *peer;
 +
 +	rtnl_lock();
 +	list_for_each_entry(wg, &device_list, device_list) {
@@ -37703,6 +37732,8 @@ exit 0
 +			mutex_lock(&wg->device_update_lock);
 +			rcu_assign_pointer(wg->creating_net, NULL);
 +			wg_socket_reinit(wg, NULL, NULL);
++			list_for_each_entry(peer, &wg->peer_list, peer_list)
++				wg_socket_clear_peer_endpoint_src(peer);
 +			mutex_unlock(&wg->device_update_lock);
 +		}
 +	}
@@ -37753,7 +37784,7 @@ exit 0
 +}
 --- b/drivers/net/wireguard/device.h
 +++ b/drivers/net/wireguard/device.h
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,62 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -37795,21 +37826,18 @@ exit 0
 +
 +struct wg_device {
 +	struct net_device *dev;
-+	struct crypt_queue encrypt_queue, decrypt_queue;
++	struct crypt_queue encrypt_queue, decrypt_queue, handshake_queue;
 +	struct sock __rcu *sock4, *sock6;
 +	struct net __rcu *creating_net;
 +	struct noise_static_identity static_identity;
-+	struct workqueue_struct *handshake_receive_wq, *handshake_send_wq;
-+	struct workqueue_struct *packet_crypt_wq;
-+	struct sk_buff_head incoming_handshakes;
-+	int incoming_handshake_cpu;
-+	struct multicore_worker __percpu *incoming_handshakes_worker;
++	struct workqueue_struct *packet_crypt_wq,*handshake_receive_wq, *handshake_send_wq;
 +	struct cookie_checker cookie_checker;
 +	struct pubkey_hashtable *peer_hashtable;
 +	struct index_hashtable *index_hashtable;
 +	struct allowedips peer_allowedips;
 +	struct mutex device_update_lock, socket_update_lock;
 +	struct list_head device_list, peer_list;
++	atomic_t handshake_queue_len;
 +	unsigned int num_peers, device_update_gen;
 +	u32 fwmark;
 +	u16 incoming_port;
@@ -37841,7 +37869,7 @@ exit 0
 +#include <linux/genetlink.h>
 +#include <net/rtnetlink.h>
 +
-+static int __init mod_init(void)
++static int __init wg_mod_init(void)
 +{
 +	int ret;
 +
@@ -37884,7 +37912,7 @@ exit 0
 +	return ret;
 +}
 +
-+static void __exit mod_exit(void)
++static void __exit wg_mod_exit(void)
 +{
 +	wg_genetlink_uninit();
 +	wg_device_uninit();
@@ -37892,8 +37920,8 @@ exit 0
 +	wg_allowedips_slab_uninit();
 +}
 +
-+module_init(mod_init);
-+module_exit(mod_exit);
++module_init(wg_mod_init);
++module_exit(wg_mod_exit);
 +MODULE_LICENSE("GPL v2");
 +MODULE_DESCRIPTION("WireGuard secure network tunnel");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
@@ -38697,7 +38725,7 @@ exit 0
 +#endif /* _WG_NETLINK_H */
 --- b/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
-@@ -0,0 +1,828 @@
+@@ -0,0 +1,861 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -39002,6 +39030,41 @@ exit 0
 +		static_identity->static_public, private_key);
 +}
 +
++static void hmac(u8 *out, const u8 *in, const u8 *key, const size_t inlen, const size_t keylen)
++{
++	struct blake2s_state state;
++	u8 x_key[BLAKE2S_BLOCK_SIZE] __aligned(__alignof__(u32)) = { 0 };
++	u8 i_hash[BLAKE2S_HASH_SIZE] __aligned(__alignof__(u32));
++	int i;
++
++	if (keylen > BLAKE2S_BLOCK_SIZE) {
++		blake2s_init(&state, BLAKE2S_HASH_SIZE);
++		blake2s_update(&state, key, keylen);
++		blake2s_final(&state, x_key);
++	} else
++		memcpy(x_key, key, keylen);
++
++	for (i = 0; i < BLAKE2S_BLOCK_SIZE; ++i)
++		x_key[i] ^= 0x36;
++
++	blake2s_init(&state, BLAKE2S_HASH_SIZE);
++	blake2s_update(&state, x_key, BLAKE2S_BLOCK_SIZE);
++	blake2s_update(&state, in, inlen);
++	blake2s_final(&state, i_hash);
++
++	for (i = 0; i < BLAKE2S_BLOCK_SIZE; ++i)
++		x_key[i] ^= 0x5c ^ 0x36;
++
++	blake2s_init(&state, BLAKE2S_HASH_SIZE);
++	blake2s_update(&state, x_key, BLAKE2S_BLOCK_SIZE);
++	blake2s_update(&state, i_hash, BLAKE2S_HASH_SIZE);
++	blake2s_final(&state, i_hash);
++
++	memcpy(out, i_hash, BLAKE2S_HASH_SIZE);
++	memzero_explicit(x_key, BLAKE2S_BLOCK_SIZE);
++	memzero_explicit(i_hash, BLAKE2S_HASH_SIZE);
++}
++
 +/* This is Hugo Krawczyk's HKDF:
 + *  - https://eprint.iacr.org/2010/264.pdf
 + *  - https://tools.ietf.org/html/rfc5869
@@ -39022,14 +39085,14 @@ exit 0
 +		 ((third_len || third_dst) && (!second_len || !second_dst))));
 +
 +	/* Extract entropy from data into secret */
-+	blake2s256_hmac(secret, data, chaining_key, data_len, NOISE_HASH_LEN);
++	hmac(secret, data, chaining_key, data_len, NOISE_HASH_LEN);
 +
 +	if (!first_dst || !first_len)
 +		goto out;
 +
 +	/* Expand first key: key = secret, data = 0x1 */
 +	output[0] = 1;
-+	blake2s256_hmac(output, output, secret, 1, BLAKE2S_HASH_SIZE);
++	hmac(output, output, secret, 1, BLAKE2S_HASH_SIZE);
 +	memcpy(first_dst, output, first_len);
 +
 +	if (!second_dst || !second_len)
@@ -39037,8 +39100,7 @@ exit 0
 +
 +	/* Expand second key: key = secret, data = first-key || 0x2 */
 +	output[BLAKE2S_HASH_SIZE] = 2;
-+	blake2s256_hmac(output, output, secret, BLAKE2S_HASH_SIZE + 1,
-+			BLAKE2S_HASH_SIZE);
++	hmac(output, output, secret, BLAKE2S_HASH_SIZE + 1, BLAKE2S_HASH_SIZE);
 +	memcpy(second_dst, output, second_len);
 +
 +	if (!third_dst || !third_len)
@@ -39046,8 +39108,7 @@ exit 0
 +
 +	/* Expand third key: key = secret, data = second-key || 0x3 */
 +	output[BLAKE2S_HASH_SIZE] = 3;
-+	blake2s256_hmac(output, output, secret, BLAKE2S_HASH_SIZE + 1,
-+			BLAKE2S_HASH_SIZE);
++	hmac(output, output, secret, BLAKE2S_HASH_SIZE + 1, BLAKE2S_HASH_SIZE);
 +	memcpy(third_dst, output, third_len);
 +
 +out:
@@ -40294,13 +40355,14 @@ exit 0
 +#endif /* _WG_PEERLOOKUP_H */
 --- b/drivers/net/wireguard/queueing.c
 +++ b/drivers/net/wireguard/queueing.c
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,108 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
 + */
 +
 +#include "queueing.h"
++#include <linux/skb_array.h>
 +
 +struct multicore_worker __percpu *
 +wg_packet_percpu_multicore_worker_alloc(work_func_t function, void *ptr)
@@ -40335,11 +40397,11 @@ exit 0
 +	return 0;
 +}
 +
-+void wg_packet_queue_free(struct crypt_queue *queue)
++void wg_packet_queue_free(struct crypt_queue *queue, bool purge)
 +{
 +	free_percpu(queue->worker);
-+	WARN_ON(!__ptr_ring_empty(&queue->ring));
-+	ptr_ring_cleanup(&queue->ring, NULL);
++	WARN_ON(!purge && !__ptr_ring_empty(&queue->ring));
++	ptr_ring_cleanup(&queue->ring, purge ? __skb_array_destroy_skb : NULL);
 +}
 +
 +#define NEXT(skb) ((skb)->prev)
@@ -40430,7 +40492,7 @@ exit 0
 +/* queueing.c APIs: */
 +int wg_packet_queue_init(struct crypt_queue *queue, work_func_t function,
 +			 unsigned int len);
-+void wg_packet_queue_free(struct crypt_queue *queue);
++void wg_packet_queue_free(struct crypt_queue *queue, bool purge);
 +struct multicore_worker __percpu *
 +wg_packet_percpu_multicore_worker_alloc(work_func_t function, void *ptr);
 +
@@ -40619,7 +40681,7 @@ exit 0
 +#endif
 +
 +#endif /* _WG_QUEUEING_H */
---- /dev/null
+--- b/drivers/net/wireguard/ratelimiter.c
 +++ b/drivers/net/wireguard/ratelimiter.c
 @@ -0,0 +1,223 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -40800,12 +40862,12 @@ exit 0
 +			(1U << 14) / sizeof(struct hlist_head)));
 +	max_entries = table_size * 8;
 +
-+	table_v4 = kvzalloc(table_size * sizeof(*table_v4), GFP_KERNEL);
++	table_v4 = kvcalloc(table_size, sizeof(*table_v4), GFP_KERNEL);
 +	if (unlikely(!table_v4))
 +		goto err_kmemcache;
 +
 +#if IS_ENABLED(CONFIG_IPV6)
-+	table_v6 = kvzalloc(table_size * sizeof(*table_v6), GFP_KERNEL);
++	table_v6 = kvcalloc(table_size, sizeof(*table_v6), GFP_KERNEL);
 +	if (unlikely(!table_v6)) {
 +		kvfree(table_v4);
 +		goto err_kmemcache;
@@ -40869,7 +40931,7 @@ exit 0
 +#endif /* _WG_RATELIMITER_H */
 --- b/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
-@@ -0,0 +1,586 @@
+@@ -0,0 +1,593 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -40988,8 +41050,8 @@ exit 0
 +		return;
 +	}
 +
-+	under_load = skb_queue_len(&wg->incoming_handshakes) >=
-+		     MAX_QUEUED_INCOMING_HANDSHAKES / 8;
++	under_load = atomic_read(&wg->handshake_queue_len) >=
++			MAX_QUEUED_INCOMING_HANDSHAKES / 8;
 +	if (under_load) {
 +		last_under_load = ktime_get_coarse_boottime_ns();
 +	} else if (last_under_load) {
@@ -41084,13 +41146,14 @@ exit 0
 +
 +void wg_packet_handshake_receive_worker(struct work_struct *work)
 +{
-+	struct wg_device *wg = container_of(work, struct multicore_worker,
-+					    work)->ptr;
++	struct crypt_queue *queue = container_of(work, struct multicore_worker, work)->ptr;
++	struct wg_device *wg = container_of(queue, struct wg_device, handshake_queue);
 +	struct sk_buff *skb;
 +
-+	while ((skb = skb_dequeue(&wg->incoming_handshakes)) != NULL) {
++	while ((skb = ptr_ring_consume_bh(&queue->ring)) != NULL) {
 +		wg_receive_handshake_packet(wg, skb);
 +		dev_kfree_skb(skb);
++		atomic_dec(&wg->handshake_queue_len);
 +		cond_resched();
 +	}
 +}
@@ -41425,22 +41488,28 @@ exit 0
 +	case cpu_to_le32(MESSAGE_HANDSHAKE_INITIATION):
 +	case cpu_to_le32(MESSAGE_HANDSHAKE_RESPONSE):
 +	case cpu_to_le32(MESSAGE_HANDSHAKE_COOKIE): {
-+		int cpu;
++		int cpu, ret = -EBUSY;
 +
-+		if (skb_queue_len(&wg->incoming_handshakes) >
-+			    MAX_QUEUED_INCOMING_HANDSHAKES ||
-+		    unlikely(!rng_is_initialized())) {
++		if (unlikely(!rng_is_initialized()))
++			goto drop;
++		if (atomic_read(&wg->handshake_queue_len) > MAX_QUEUED_INCOMING_HANDSHAKES / 2) {
++			if (spin_trylock_bh(&wg->handshake_queue.ring.producer_lock)) {
++				ret = __ptr_ring_produce(&wg->handshake_queue.ring, skb);
++				spin_unlock_bh(&wg->handshake_queue.ring.producer_lock);
++			}
++		} else
++			ret = ptr_ring_produce_bh(&wg->handshake_queue.ring, skb);
++		if (ret) {
++	drop:
 +			net_dbg_skb_ratelimited("%s: Dropping handshake packet from %pISpfsc\n",
 +						wg->dev->name, skb);
 +			goto err;
 +		}
-+		skb_queue_tail(&wg->incoming_handshakes, skb);
-+		/* Queues up a call to packet_process_queued_handshake_
-+		 * packets(skb):
-+		 */
-+		cpu = wg_cpumask_next_online(&wg->incoming_handshake_cpu);
++		atomic_inc(&wg->handshake_queue_len);
++		cpu = wg_cpumask_next_online(&wg->handshake_queue.last_cpu);
++		/* Queues up a call to packet_process_queued_handshake_packets(skb): */
 +		queue_work_on(cpu, wg->handshake_receive_wq,
-+			&per_cpu_ptr(wg->incoming_handshakes_worker, cpu)->work);
++			      &per_cpu_ptr(wg->handshake_queue.worker, cpu)->work);
 +		break;
 +	}
 +	case cpu_to_le32(MESSAGE_DATA):
@@ -42896,7 +42965,7 @@ exit 0
 +}
 --- b/drivers/net/wireguard/socket.c
 +++ b/drivers/net/wireguard/socket.c
-@@ -0,0 +1,436 @@
+@@ -0,0 +1,437 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -43059,6 +43128,7 @@ exit 0
 +	rcu_read_unlock_bh();
 +	return ret;
 +#else
++	kfree_skb(skb);
 +	return -EAFNOSUPPORT;
 +#endif
 +}
@@ -43140,7 +43210,7 @@ exit 0
 +		endpoint->addr4.sin_addr.s_addr = ip_hdr(skb)->saddr;
 +		endpoint->src4.s_addr = ip_hdr(skb)->daddr;
 +		endpoint->src_if4 = skb->skb_iif;
-+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
++	} else if (IS_ENABLED(CONFIG_IPV6) && skb->protocol == htons(ETH_P_IPV6)) {
 +		endpoint->addr6.sin6_family = AF_INET6;
 +		endpoint->addr6.sin6_port = udp_hdr(skb)->source;
 +		endpoint->addr6.sin6_addr = ipv6_hdr(skb)->saddr;
@@ -43183,7 +43253,7 @@ exit 0
 +		peer->endpoint.addr4 = endpoint->addr4;
 +		peer->endpoint.src4 = endpoint->src4;
 +		peer->endpoint.src_if4 = endpoint->src_if4;
-+	} else if (endpoint->addr.sa_family == AF_INET6) {
++	} else if (IS_ENABLED(CONFIG_IPV6) && endpoint->addr.sa_family == AF_INET6) {
 +		peer->endpoint.addr6 = endpoint->addr6;
 +		peer->endpoint.src6 = endpoint->src6;
 +	} else {
@@ -43207,7 +43277,7 @@ exit 0
 +{
 +	write_lock_bh(&peer->endpoint_lock);
 +	memset(&peer->endpoint.src6, 0, sizeof(peer->endpoint.src6));
-+	dst_cache_reset(&peer->endpoint_cache);
++	dst_cache_reset_now(&peer->endpoint_cache);
 +	write_unlock_bh(&peer->endpoint_lock);
 +}
 +
@@ -43865,7 +43935,7 @@ exit 0
 +#endif /* _WG_UAPI_WIREGUARD_H */
 --- b/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
-@@ -0,0 +1,636 @@
+@@ -0,0 +1,674 @@
 +#!/bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +#
@@ -43890,10 +43960,12 @@ exit 0
 +# interfaces in $ns1 and $ns2. See https://www.wireguard.com/netns/ for further
 +# details on how this is accomplished.
 +set -e
++shopt -s extglob
 +
 +exec 3>&1
 +export LANG=C
 +export WG_HIDE_KEYS=never
++NPROC=( /sys/devices/system/cpu/cpu+([0-9]) ); NPROC=${#NPROC[@]}
 +netns0="wg-test-$$-0"
 +netns1="wg-test-$$-1"
 +netns2="wg-test-$$-2"
@@ -44011,17 +44083,15 @@ exit 0
 +	n1 iperf3 -Z -t 3 -b 0 -u -c fd00::2
 +
 +	# TCP over IPv4, in parallel
-+	for max in 4 5 50; do
-+		local pids=( )
-+		for ((i=0; i < max; ++i)) do
-+			n2 iperf3 -p $(( 5200 + i )) -s -1 -B 192.168.241.2 &
-+			pids+=( $! ); waitiperf $netns2 $! $(( 5200 + i ))
-+		done
-+		for ((i=0; i < max; ++i)) do
-+			n1 iperf3 -Z -t 3 -p $(( 5200 + i )) -c 192.168.241.2 &
-+		done
-+		wait "${pids[@]}"
++	local pids=( ) i
++	for ((i=0; i < NPROC; ++i)) do
++		n2 iperf3 -p $(( 5200 + i )) -s -1 -B 192.168.241.2 &
++		pids+=( $! ); waitiperf $netns2 $! $(( 5200 + i ))
 +	done
++	for ((i=0; i < NPROC; ++i)) do
++		n1 iperf3 -Z -t 3 -p $(( 5200 + i )) -c 192.168.241.2 &
++	done
++	wait "${pids[@]}"
 +}
 +
 +[[ $(ip1 link show dev wg0) =~ mtu\ ([0-9]+) ]] && orig_mtu="${BASH_REMATCH[1]}"
@@ -44144,7 +44214,23 @@ exit 0
 +n1 wg set wg0 peer "$pub2" endpoint 192.168.241.2:7
 +ip2 link del wg0
 +ip2 link del wg1
-+! n0 ping -W 1 -c 10 -f 192.168.241.2 || false # Should not crash kernel
++read _ _ tx_bytes_before < <(n0 wg show wg1 transfer)
++! n0 ping -W 1 -c 10 -f 192.168.241.2 || false
++sleep 1
++read _ _ tx_bytes_after < <(n0 wg show wg1 transfer)
++if ! (( tx_bytes_after - tx_bytes_before < 70000 )); then
++	errstart=$'\x1b[37m\x1b[41m\x1b[1m'
++	errend=$'\x1b[0m'
++	echo "${errstart}                                                ${errend}"
++	echo "${errstart}                   E  R  R  O  R                ${errend}"
++	echo "${errstart}                                                ${errend}"
++	echo "${errstart} This architecture does not do the right thing  ${errend}"
++	echo "${errstart} with cross-namespace routing loops. This test  ${errend}"
++	echo "${errstart} has thus technically failed but, as this issue ${errend}"
++	echo "${errstart} is as yet unsolved, these tests will continue  ${errend}"
++	echo "${errstart} onward. :(                                     ${errend}"
++	echo "${errstart}                                                ${errend}"
++fi
 +
 +ip0 link del wg1
 +ip1 link del wg0
@@ -44477,6 +44563,28 @@ exit 0
 +kill $ncat_pid
 +ip0 link del wg0
 +
++# Ensure that dst_cache references don't outlive netns lifetime
++ip1 link add dev wg0 type wireguard
++ip2 link add dev wg0 type wireguard
++configure_peers
++ip1 link add veth1 type veth peer name veth2
++ip1 link set veth2 netns $netns2
++ip1 addr add fd00:aa::1/64 dev veth1
++ip2 addr add fd00:aa::2/64 dev veth2
++ip1 link set veth1 up
++ip2 link set veth2 up
++waitiface $netns1 veth1
++waitiface $netns2 veth2
++ip1 -6 route add default dev veth1 via fd00:aa::2
++ip2 -6 route add default dev veth2 via fd00:aa::1
++n1 wg set wg0 peer "$pub2" endpoint [fd00:aa::2]:2
++n2 wg set wg0 peer "$pub1" endpoint [fd00:aa::1]:1
++n1 ping6 -c 1 fd00::2
++pp ip netns delete $netns1
++pp ip netns delete $netns2
++pp ip netns add $netns1
++pp ip netns add $netns2
++
 +# Ensure there aren't circular reference loops
 +ip1 link add wg1 type wireguard
 +ip2 link add wg2 type wireguard
@@ -44495,46 +44603,46 @@ exit 0
 +done < /dev/kmsg
 +alldeleted=1
 +for object in "${!objects[@]}"; do
-+	if [[ ${objects["$object"]} != *createddestroyed ]]; then
++	if [[ ${objects["$object"]} != *createddestroyed && ${objects["$object"]} != *createdcreateddestroyeddestroyed ]]; then
 +		echo "Error: $object: merely ${objects["$object"]}" >&3
 +		alldeleted=0
 +	fi
 +done
 +[[ $alldeleted -eq 1 ]]
 +pretty "" "Objects that were created were also destroyed."
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/.gitignore
 +++ b/tools/testing/selftests/wireguard/qemu/.gitignore
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,4 @@
++# SPDX-License-Identifier: GPL-2.0-only
 +build/
 +distfiles/
++ccache/
 --- b/tools/testing/selftests/wireguard/qemu/Makefile
 +++ b/tools/testing/selftests/wireguard/qemu/Makefile
-@@ -0,0 +1,377 @@
+@@ -0,0 +1,422 @@
 +# SPDX-License-Identifier: GPL-2.0
 +#
 +# Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
 +
 +PWD := $(shell pwd)
 +
-+CHOST := $(shell gcc -dumpmachine)
-+HOST_ARCH := $(firstword $(subst -, ,$(CHOST)))
-+ifneq (,$(ARCH))
-+CBUILD := $(subst -gcc,,$(lastword $(subst /, ,$(firstword $(wildcard $(foreach bindir,$(subst :, ,$(PATH)),$(bindir)/$(ARCH)-*-gcc))))))
-+ifeq (,$(CBUILD))
-+$(error The toolchain for $(ARCH) is not installed)
-+endif
-+else
-+CBUILD := $(CHOST)
-+ARCH := $(firstword $(subst -, ,$(CBUILD)))
-+endif
-+
 +# Set these from the environment to override
 +KERNEL_PATH ?= $(PWD)/../../../../..
 +BUILD_PATH ?= $(PWD)/build/$(ARCH)
 +DISTFILES_PATH ?= $(PWD)/distfiles
 +NR_CPUS ?= 4
++ARCH ?=
++CBUILD := $(shell gcc -dumpmachine)
++HOST_ARCH := $(firstword $(subst -, ,$(CBUILD)))
++ifeq ($(ARCH),)
++ARCH := $(HOST_ARCH)
++endif
 +
 +MIRROR := https://download.wireguard.com/qemu-test/distfiles/
++
++KERNEL_BUILD_PATH := $(BUILD_PATH)/kernel$(if $(findstring yes,$(DEBUG_KERNEL)),-debug)
++rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
++WIREGUARD_SOURCES := $(call rwildcard,$(KERNEL_PATH)/drivers/net/wireguard/,*)
 +
 +default: qemu
 +
@@ -44548,42 +44656,33 @@ exit 0
 +endef
 +
 +define file_download =
-+$(DISTFILES_PATH)/$(1):
++$(DISTFILES_PATH)/$(1): | $(4)
 +	mkdir -p $(DISTFILES_PATH)
-+	flock -x $$@.lock -c '[ -f $$@ ] && exit 0; wget -O $$@.tmp $(MIRROR)$(1) || wget -O $$@.tmp $(2)$(1) || rm -f $$@.tmp; [ -f $$@.tmp ] || exit 1; if echo "$(3)  $$@.tmp" | sha256sum -c -; then mv $$@.tmp $$@; else rm -f $$@.tmp; exit 71; fi'
++	flock -x $$@.lock -c '[ -f $$@ ] && exit 0; wget -O $$@.tmp $(MIRROR)$(1) || wget -O $$@.tmp $(2)$(1) || rm -f $$@.tmp; [ -f $$@.tmp ] || exit 1; if ([ -n "$(4)" ] && sed -n "s#^\([a-f0-9]\{64\}\)  \($(1)\)\$$$$#\1  $(DISTFILES_PATH)/\2.tmp#p" "$(4)" || echo "$(3)  $$@.tmp") | sha256sum -c -; then mv $$@.tmp $$@; else rm -f $$@.tmp; exit 71; fi'
 +endef
 +
-+$(eval $(call tar_download,MUSL,musl,1.1.24,.tar.gz,https://www.musl-libc.org/releases/,1370c9a812b2cf2a7d92802510cca0058cc37e66a7bedd70051f0a34015022a3))
-+$(eval $(call tar_download,IPERF,iperf,3.7,.tar.gz,https://downloads.es.net/pub/iperf/,d846040224317caf2f75c843d309a950a7db23f9b44b94688ccbe557d6d1710c))
-+$(eval $(call tar_download,BASH,bash,5.0,.tar.gz,https://ftp.gnu.org/gnu/bash/,b4a80f2ac66170b2913efbfb9f2594f1f76c7b1afd11f799e22035d63077fb4d))
-+$(eval $(call tar_download,IPROUTE2,iproute2,5.6.0,.tar.xz,https://www.kernel.org/pub/linux/utils/net/iproute2/,1b5b0e25ce6e23da7526ea1da044e814ad85ba761b10dd29c2b027c056b04692))
-+$(eval $(call tar_download,IPTABLES,iptables,1.8.4,.tar.bz2,https://www.netfilter.org/projects/iptables/files/,993a3a5490a544c2cbf2ef15cf7e7ed21af1845baf228318d5c36ef8827e157c))
-+$(eval $(call tar_download,NMAP,nmap,7.80,.tar.bz2,https://nmap.org/dist/,fcfa5a0e42099e12e4bf7a68ebe6fde05553383a682e816a7ec9256ab4773faa))
++$(eval $(call tar_download,IPERF,iperf,3.11,.tar.gz,https://downloads.es.net/pub/iperf/,de8cb409fad61a0574f4cb07eb19ce1159707403ac2dc01b5d175e91240b7e5f))
++$(eval $(call tar_download,BASH,bash,5.1.16,.tar.gz,https://ftp.gnu.org/gnu/bash/,5bac17218d3911834520dad13cd1f85ab944e1c09ae1aba55906be1f8192f558))
++$(eval $(call tar_download,IPROUTE2,iproute2,5.17.0,.tar.gz,https://www.kernel.org/pub/linux/utils/net/iproute2/,bda331d5c4606138892f23a565d78fca18919b4d508a0b7ca8391c2da2db68b9))
++$(eval $(call tar_download,IPTABLES,iptables,1.8.7,.tar.bz2,https://www.netfilter.org/projects/iptables/files/,c109c96bb04998cd44156622d36f8e04b140701ec60531a10668cfdff5e8d8f0))
++$(eval $(call tar_download,NMAP,nmap,7.92,.tgz,https://nmap.org/dist/,064183ea642dc4c12b1ab3b5358ce1cef7d2e7e11ffa2849f16d339f5b717117))
 +$(eval $(call tar_download,IPUTILS,iputils,s20190709,.tar.gz,https://github.com/iputils/iputils/archive/s20190709.tar.gz/#,a15720dd741d7538dd2645f9f516d193636ae4300ff7dbc8bfca757bf166490a))
-+$(eval $(call tar_download,WIREGUARD_TOOLS,wireguard-tools,1.0.20200206,.tar.xz,https://git.zx2c4.com/wireguard-tools/snapshot/,f5207248c6a3c3e3bfc9ab30b91c1897b00802ed861e1f9faaed873366078c64))
++$(eval $(call tar_download,WIREGUARD_TOOLS,wireguard-tools,1.0.20210914,.tar.xz,https://git.zx2c4.com/wireguard-tools/snapshot/,97ff31489217bb265b7ae850d3d0f335ab07d2652ba1feec88b734bc96bd05ac))
 +
-+KERNEL_BUILD_PATH := $(BUILD_PATH)/kernel$(if $(findstring yes,$(DEBUG_KERNEL)),-debug)
-+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
-+WIREGUARD_SOURCES := $(call rwildcard,$(KERNEL_PATH)/drivers/net/wireguard/,*)
-+
-+export CFLAGS ?= -O3 -pipe
-+export LDFLAGS ?=
-+export CPPFLAGS := -I$(BUILD_PATH)/include
-+
++export CFLAGS := -O3 -pipe
 +ifeq ($(HOST_ARCH),$(ARCH))
-+CROSS_COMPILE_FLAG := --host=$(CHOST)
 +CFLAGS += -march=native
-+STRIP := strip
-+else
-+$(info Cross compilation: building for $(CBUILD) using $(CHOST))
-+CROSS_COMPILE_FLAG := --build=$(CBUILD) --host=$(CHOST)
-+export CROSS_COMPILE=$(CBUILD)-
-+STRIP := $(CBUILD)-strip
 +endif
++export LDFLAGS :=
++export CPPFLAGS :=
++
++QEMU_VPORT_RESULT :=
 +ifeq ($(ARCH),aarch64)
++CHOST := aarch64-linux-musl
 +QEMU_ARCH := aarch64
 +KERNEL_ARCH := arm64
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/arm64/boot/Image
++QEMU_VPORT_RESULT := virtio-serial-device
 +ifeq ($(HOST_ARCH),$(ARCH))
 +QEMU_MACHINE := -cpu host -machine virt,gic_version=host,accel=kvm
 +else
@@ -44591,9 +44690,11 @@ exit 0
 +CFLAGS += -march=armv8-a -mtune=cortex-a53
 +endif
 +else ifeq ($(ARCH),aarch64_be)
++CHOST := aarch64_be-linux-musl
 +QEMU_ARCH := aarch64
 +KERNEL_ARCH := arm64
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/arm64/boot/Image
++QEMU_VPORT_RESULT := virtio-serial-device
 +ifeq ($(HOST_ARCH),$(ARCH))
 +QEMU_MACHINE := -cpu host -machine virt,gic_version=host,accel=kvm
 +else
@@ -44601,9 +44702,11 @@ exit 0
 +CFLAGS += -march=armv8-a -mtune=cortex-a53
 +endif
 +else ifeq ($(ARCH),arm)
++CHOST := arm-linux-musleabi
 +QEMU_ARCH := arm
 +KERNEL_ARCH := arm
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/arm/boot/zImage
++QEMU_VPORT_RESULT := virtio-serial-device
 +ifeq ($(HOST_ARCH),$(ARCH))
 +QEMU_MACHINE := -cpu host -machine virt,gic_version=host,accel=kvm
 +else
@@ -44611,9 +44714,11 @@ exit 0
 +CFLAGS += -march=armv7-a -mtune=cortex-a15 -mabi=aapcs-linux
 +endif
 +else ifeq ($(ARCH),armeb)
++CHOST := armeb-linux-musleabi
 +QEMU_ARCH := arm
 +KERNEL_ARCH := arm
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/arm/boot/zImage
++QEMU_VPORT_RESULT := virtio-serial-device
 +ifeq ($(HOST_ARCH),$(ARCH))
 +QEMU_MACHINE := -cpu host -machine virt,gic_version=host,accel=kvm
 +else
@@ -44622,6 +44727,7 @@ exit 0
 +LDFLAGS += -Wl,--be8
 +endif
 +else ifeq ($(ARCH),x86_64)
++CHOST := x86_64-linux-musl
 +QEMU_ARCH := x86_64
 +KERNEL_ARCH := x86_64
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/x86/boot/bzImage
@@ -44632,6 +44738,7 @@ exit 0
 +CFLAGS += -march=skylake-avx512
 +endif
 +else ifeq ($(ARCH),i686)
++CHOST := i686-linux-musl
 +QEMU_ARCH := i386
 +KERNEL_ARCH := x86
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/x86/boot/bzImage
@@ -44642,6 +44749,7 @@ exit 0
 +CFLAGS += -march=prescott
 +endif
 +else ifeq ($(ARCH),mips64)
++CHOST := mips64-linux-musl
 +QEMU_ARCH := mips64
 +KERNEL_ARCH := mips
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
@@ -44653,6 +44761,7 @@ exit 0
 +CFLAGS += -march=mips64r2 -EB
 +endif
 +else ifeq ($(ARCH),mips64el)
++CHOST := mips64el-linux-musl
 +QEMU_ARCH := mips64el
 +KERNEL_ARCH := mips
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
@@ -44664,6 +44773,7 @@ exit 0
 +CFLAGS += -march=mips64r2 -EL
 +endif
 +else ifeq ($(ARCH),mips)
++CHOST := mips-linux-musl
 +QEMU_ARCH := mips
 +KERNEL_ARCH := mips
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
@@ -44675,6 +44785,7 @@ exit 0
 +CFLAGS += -march=mips32r2 -EB
 +endif
 +else ifeq ($(ARCH),mipsel)
++CHOST := mipsel-linux-musl
 +QEMU_ARCH := mipsel
 +KERNEL_ARCH := mips
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
@@ -44685,7 +44796,8 @@ exit 0
 +QEMU_MACHINE := -cpu 24Kf -machine malta -smp 1
 +CFLAGS += -march=mips32r2 -EL
 +endif
-+else ifeq ($(ARCH),powerpc64le)
++else ifeq ($(ARCH),powerpc64)
++CHOST := powerpc64-linux-musl
 +QEMU_ARCH := ppc64
 +KERNEL_ARCH := powerpc
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
@@ -44694,8 +44806,18 @@ exit 0
 +else
 +QEMU_MACHINE := -machine pseries
 +endif
-+CFLAGS += -mcpu=powerpc64le -mlong-double-64
++else ifeq ($(ARCH),powerpc64le)
++CHOST := powerpc64le-linux-musl
++QEMU_ARCH := ppc64
++KERNEL_ARCH := powerpc
++KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
++ifeq ($(HOST_ARCH),$(ARCH))
++QEMU_MACHINE := -cpu host,accel=kvm -machine pseries
++else
++QEMU_MACHINE := -machine pseries
++endif
 +else ifeq ($(ARCH),powerpc)
++CHOST := powerpc-linux-musl
 +QEMU_ARCH := ppc
 +KERNEL_ARCH := powerpc
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/powerpc/boot/uImage
@@ -44704,26 +44826,57 @@ exit 0
 +else
 +QEMU_MACHINE := -machine ppce500
 +endif
-+CFLAGS += -mcpu=powerpc -mlong-double-64 -msecure-plt
 +else ifeq ($(ARCH),m68k)
++CHOST := m68k-linux-musl
 +QEMU_ARCH := m68k
 +KERNEL_ARCH := m68k
 +KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/vmlinux
 +KERNEL_CMDLINE := $(shell sed -n 's/CONFIG_CMDLINE=\(.*\)/\1/p' arch/m68k.config)
 +ifeq ($(HOST_ARCH),$(ARCH))
-+QEMU_MACHINE := -cpu host,accel=kvm -machine q800 -smp 1 -append $(KERNEL_CMDLINE)
++QEMU_MACHINE := -cpu host,accel=kvm -machine q800 -append $(KERNEL_CMDLINE)
 +else
 +QEMU_MACHINE := -machine q800 -smp 1 -append $(KERNEL_CMDLINE)
 +endif
++else ifeq ($(ARCH),s390x)
++CHOST := s390x-linux-musl
++QEMU_ARCH := s390x
++KERNEL_ARCH := s390
++KERNEL_BZIMAGE := $(KERNEL_BUILD_PATH)/arch/s390/boot/bzImage
++KERNEL_CMDLINE := $(shell sed -n 's/CONFIG_CMDLINE=\(.*\)/\1/p' arch/s390x.config)
++QEMU_VPORT_RESULT := virtio-serial-ccw
++ifeq ($(HOST_ARCH),$(ARCH))
++QEMU_MACHINE := -cpu host,accel=kvm -machine s390-ccw-virtio -append $(KERNEL_CMDLINE)
 +else
-+$(error I only build: x86_64, i686, arm, armeb, aarch64, aarch64_be, mips, mipsel, mips64, mips64el, powerpc64le, powerpc, m68k)
++QEMU_MACHINE := -machine s390-ccw-virtio -append $(KERNEL_CMDLINE)
++endif
++else
++$(error I only build: x86_64, i686, arm, armeb, aarch64, aarch64_be, mips, mipsel, mips64, mips64el, powerpc64, powerpc64le, powerpc, m68k, s390x)
 +endif
 +
-+REAL_CC := $(CBUILD)-gcc
-+MUSL_CC := $(BUILD_PATH)/musl-gcc
-+export CC := $(MUSL_CC)
-+USERSPACE_DEPS := $(MUSL_CC) $(BUILD_PATH)/include/.installed $(BUILD_PATH)/include/linux/.installed
++TOOLCHAIN_FILENAME := $(CHOST)-cross.tgz
++TOOLCHAIN_TAR := $(DISTFILES_PATH)/$(TOOLCHAIN_FILENAME)
++TOOLCHAIN_PATH := $(BUILD_PATH)/$(CHOST)-cross
++TOOLCHAIN_DIR := https://download.wireguard.com/qemu-test/toolchains/20211123/
++$(eval $(call file_download,toolchain-sha256sums-20211123,$(TOOLCHAIN_DIR)SHA256SUMS#,83da033fd8c798df476c21d9612da2dfb896ec62fbed4ceec5eefc0e56b3f0c8))
++$(eval $(call file_download,$(TOOLCHAIN_FILENAME),$(TOOLCHAIN_DIR),,$(DISTFILES_PATH)/toolchain-sha256sums-20211123))
 +
++STRIP := $(CHOST)-strip
++CROSS_COMPILE_FLAG := --build=$(CBUILD) --host=$(CHOST)
++$(info Building for $(CHOST) using $(CBUILD))
++export CROSS_COMPILE := $(CHOST)-
++export PATH := $(TOOLCHAIN_PATH)/bin:$(PATH)
++export CC := $(CHOST)-gcc
++CCACHE_PATH := $(shell which ccache 2>/dev/null)
++ifneq ($(CCACHE_PATH),)
++export KBUILD_BUILD_TIMESTAMP := Fri Jun  5 15:58:00 CEST 2015
++export PATH := $(TOOLCHAIN_PATH)/bin/ccache:$(PATH)
++export CCACHE_SLOPPINESS := file_macro,time_macros
++export CCACHE_DIR ?= $(PWD)/ccache
++endif
++
++USERSPACE_DEPS := $(TOOLCHAIN_PATH)/.installed $(TOOLCHAIN_PATH)/$(CHOST)/include/linux/.installed
++
++comma := ,
 +build: $(KERNEL_BZIMAGE)
 +qemu: $(KERNEL_BZIMAGE)
 +	rm -f $(BUILD_PATH)/result
@@ -44734,13 +44887,14 @@ exit 0
 +		$(QEMU_MACHINE) \
 +		-m $$(grep -q CONFIG_DEBUG_KMEMLEAK=y $(KERNEL_BUILD_PATH)/.config && echo 1G || echo 256M) \
 +		-serial stdio \
-+		-serial file:$(BUILD_PATH)/result \
++		-chardev file,path=$(BUILD_PATH)/result,id=result \
++		$(if $(QEMU_VPORT_RESULT),-device $(QEMU_VPORT_RESULT) -device virtserialport$(comma)chardev=result,-serial chardev:result) \
 +		-no-reboot \
 +		-monitor none \
 +		-kernel $<
 +	grep -Fq success $(BUILD_PATH)/result
 +
-+$(BUILD_PATH)/init-cpio-spec.txt:
++$(BUILD_PATH)/init-cpio-spec.txt: $(TOOLCHAIN_PATH)/.installed $(BUILD_PATH)/init
 +	mkdir -p $(BUILD_PATH)
 +	echo "file /init $(BUILD_PATH)/init 755 0 0" > $@
 +	echo "file /init.sh $(PWD)/../netns.sh 755 0 0" >> $@
@@ -44758,10 +44912,10 @@ exit 0
 +	echo "slink /bin/iptables xtables-legacy-multi 777 0 0" >> $@
 +	echo "slink /bin/ping6 ping 777 0 0" >> $@
 +	echo "dir /lib 755 0 0" >> $@
-+	echo "file /lib/libc.so $(MUSL_PATH)/lib/libc.so 755 0 0" >> $@
-+	echo "slink /lib/ld-linux.so.1 libc.so 777 0 0" >> $@
++	echo "file /lib/libc.so $(TOOLCHAIN_PATH)/$(CHOST)/lib/libc.so 755 0 0" >> $@
++	echo "slink $$($(CHOST)-readelf -p .interp '$(BUILD_PATH)/init'| grep -o '/lib/.*') libc.so 777 0 0" >> $@
 +
-+$(KERNEL_BUILD_PATH)/.config: kernel.config arch/$(ARCH).config
++$(KERNEL_BUILD_PATH)/.config: $(TOOLCHAIN_PATH)/.installed kernel.config arch/$(ARCH).config
 +	mkdir -p $(KERNEL_BUILD_PATH)
 +	cp kernel.config $(KERNEL_BUILD_PATH)/minimal.config
 +	printf 'CONFIG_NR_CPUS=$(NR_CPUS)\nCONFIG_INITRAMFS_SOURCE="$(BUILD_PATH)/init-cpio-spec.txt"\n' >> $(KERNEL_BUILD_PATH)/minimal.config
@@ -44770,28 +44924,23 @@ exit 0
 +	cd $(KERNEL_BUILD_PATH) && ARCH=$(KERNEL_ARCH) $(KERNEL_PATH)/scripts/kconfig/merge_config.sh -n $(KERNEL_BUILD_PATH)/.config $(KERNEL_BUILD_PATH)/minimal.config
 +	$(if $(findstring yes,$(DEBUG_KERNEL)),cp debug.config $(KERNEL_BUILD_PATH) && cd $(KERNEL_BUILD_PATH) && ARCH=$(KERNEL_ARCH) $(KERNEL_PATH)/scripts/kconfig/merge_config.sh -n $(KERNEL_BUILD_PATH)/.config debug.config,)
 +
-+$(KERNEL_BZIMAGE): $(KERNEL_BUILD_PATH)/.config $(BUILD_PATH)/init-cpio-spec.txt $(MUSL_PATH)/lib/libc.so $(IPERF_PATH)/src/iperf3 $(IPUTILS_PATH)/ping $(BASH_PATH)/bash $(IPROUTE2_PATH)/misc/ss $(IPROUTE2_PATH)/ip/ip $(IPTABLES_PATH)/iptables/xtables-legacy-multi $(NMAP_PATH)/ncat/ncat $(WIREGUARD_TOOLS_PATH)/src/wg $(BUILD_PATH)/init ../netns.sh $(WIREGUARD_SOURCES)
++$(KERNEL_BZIMAGE): $(TOOLCHAIN_PATH)/.installed $(KERNEL_BUILD_PATH)/.config $(BUILD_PATH)/init-cpio-spec.txt $(IPERF_PATH)/src/iperf3 $(IPUTILS_PATH)/ping $(BASH_PATH)/bash $(IPROUTE2_PATH)/misc/ss $(IPROUTE2_PATH)/ip/ip $(IPTABLES_PATH)/iptables/xtables-legacy-multi $(NMAP_PATH)/ncat/ncat $(WIREGUARD_TOOLS_PATH)/src/wg $(BUILD_PATH)/init ../netns.sh $(WIREGUARD_SOURCES)
 +	$(MAKE) -C $(KERNEL_PATH) O=$(KERNEL_BUILD_PATH) ARCH=$(KERNEL_ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
 +
-+$(BUILD_PATH)/include/linux/.installed: | $(KERNEL_BUILD_PATH)/.config
-+	$(MAKE) -C $(KERNEL_PATH) O=$(KERNEL_BUILD_PATH) INSTALL_HDR_PATH=$(BUILD_PATH) ARCH=$(KERNEL_ARCH) CROSS_COMPILE=$(CROSS_COMPILE) headers_install
++$(TOOLCHAIN_PATH)/$(CHOST)/include/linux/.installed: | $(KERNEL_BUILD_PATH)/.config $(TOOLCHAIN_PATH)/.installed
++	rm -rf $(TOOLCHAIN_PATH)/$(CHOST)/include/linux
++	$(MAKE) -C $(KERNEL_PATH) O=$(KERNEL_BUILD_PATH) INSTALL_HDR_PATH=$(TOOLCHAIN_PATH)/$(CHOST) ARCH=$(KERNEL_ARCH) CROSS_COMPILE=$(CROSS_COMPILE) headers_install
 +	touch $@
 +
-+$(MUSL_PATH)/lib/libc.so: $(MUSL_TAR)
++$(TOOLCHAIN_PATH)/.installed: $(TOOLCHAIN_TAR)
 +	mkdir -p $(BUILD_PATH)
 +	flock -s $<.lock tar -C $(BUILD_PATH) -xf $<
-+	cd $(MUSL_PATH) && CC=$(REAL_CC) ./configure --prefix=/ --disable-static --build=$(CBUILD)
-+	$(MAKE) -C $(MUSL_PATH)
-+	$(STRIP) -s $@
-+
-+$(BUILD_PATH)/include/.installed: $(MUSL_PATH)/lib/libc.so
-+	$(MAKE) -C $(MUSL_PATH) DESTDIR=$(BUILD_PATH) install-headers
++	$(STRIP) -s $(TOOLCHAIN_PATH)/$(CHOST)/lib/libc.so
++ifneq ($(CCACHE_PATH),)
++	mkdir -p $(TOOLCHAIN_PATH)/bin/ccache
++	ln -s $(CCACHE_PATH) $(TOOLCHAIN_PATH)/bin/ccache/$(CC)
++endif
 +	touch $@
-+
-+$(MUSL_CC): $(MUSL_PATH)/lib/libc.so
-+	sh $(MUSL_PATH)/tools/musl-gcc.specs.sh $(BUILD_PATH)/include $(MUSL_PATH)/lib /lib/ld-linux.so.1 > $(BUILD_PATH)/musl-gcc.specs
-+	printf '#!/bin/sh\nexec "$(REAL_CC)" --specs="$(BUILD_PATH)/musl-gcc.specs" "$$@"\n' > $(BUILD_PATH)/musl-gcc
-+	chmod +x $(BUILD_PATH)/musl-gcc
 +
 +$(IPERF_PATH)/.installed: $(IPERF_TAR)
 +	mkdir -p $(BUILD_PATH)
@@ -44801,6 +44950,7 @@ exit 0
 +	touch $@
 +
 +$(IPERF_PATH)/src/iperf3: | $(IPERF_PATH)/.installed $(USERSPACE_DEPS)
++	cd $(IPERF_PATH) && autoreconf -fi
 +	cd $(IPERF_PATH) && CFLAGS="$(CFLAGS) -D_GNU_SOURCE" ./configure --prefix=/ $(CROSS_COMPILE_FLAG) --enable-static --disable-shared --with-openssl=no
 +	$(MAKE) -C $(IPERF_PATH)
 +	$(STRIP) -s $@
@@ -44816,7 +44966,7 @@ exit 0
 +
 +$(BUILD_PATH)/init: init.c | $(USERSPACE_DEPS)
 +	mkdir -p $(BUILD_PATH)
-+	$(MUSL_CC) -o $@ $(CFLAGS) $(LDFLAGS) -std=gnu11 $<
++	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) -std=gnu11 $<
 +	$(STRIP) -s $@
 +
 +$(IPUTILS_PATH)/.installed: $(IPUTILS_TAR)
@@ -44835,15 +44985,15 @@ exit 0
 +	touch $@
 +
 +$(BASH_PATH)/bash: | $(BASH_PATH)/.installed $(USERSPACE_DEPS)
-+	cd $(BASH_PATH) && ./configure --prefix=/ $(CROSS_COMPILE_FLAG) --without-bash-malloc --disable-debugger --disable-help-builtin --disable-history --disable-multibyte --disable-progcomp --disable-readline --disable-mem-scramble
++	cd $(BASH_PATH) && ./configure --prefix=/ $(CROSS_COMPILE_FLAG) --without-bash-malloc --disable-debugger --disable-help-builtin --disable-history --disable-progcomp --disable-readline --disable-mem-scramble
 +	$(MAKE) -C $(BASH_PATH)
 +	$(STRIP) -s $@
 +
 +$(IPROUTE2_PATH)/.installed: $(IPROUTE2_TAR)
 +	mkdir -p $(BUILD_PATH)
 +	flock -s $<.lock tar -C $(BUILD_PATH) -xf $<
-+	printf 'CC:=$(CC)\nPKG_CONFIG:=pkg-config\nTC_CONFIG_XT:=n\nTC_CONFIG_ATM:=n\nTC_CONFIG_IPSET:=n\nIP_CONFIG_SETNS:=y\nHAVE_ELF:=n\nHAVE_MNL:=n\nHAVE_BERKELEY_DB:=n\nHAVE_LATEX:=n\nHAVE_PDFLATEX:=n\nCFLAGS+=-DHAVE_SETNS\n' > $(IPROUTE2_PATH)/config.mk
-+	printf 'lib: snapshot\n\t$$(MAKE) -C lib\nip/ip: lib\n\t$$(MAKE) -C ip ip\nmisc/ss: lib\n\t$$(MAKE) -C misc ss\n' >> $(IPROUTE2_PATH)/Makefile
++	printf 'CC:=$(CC)\nPKG_CONFIG:=pkg-config\nTC_CONFIG_XT:=n\nTC_CONFIG_ATM:=n\nTC_CONFIG_IPSET:=n\nIP_CONFIG_SETNS:=y\nHAVE_ELF:=n\nHAVE_MNL:=n\nHAVE_BERKELEY_DB:=n\nHAVE_LATEX:=n\nHAVE_PDFLATEX:=n\nCFLAGS+=-DHAVE_SETNS -DHAVE_HANDLE_AT\n' > $(IPROUTE2_PATH)/config.mk
++	printf 'libutil.a.done:\n\tflock -x $$@.lock $$(MAKE) -C lib\n\ttouch $$@\nip/ip: libutil.a.done\n\t$$(MAKE) -C ip ip\nmisc/ss: libutil.a.done\n\t$$(MAKE) -C misc ss\n' >> $(IPROUTE2_PATH)/Makefile
 +	touch $@
 +
 +$(IPROUTE2_PATH)/ip/ip: | $(IPROUTE2_PATH)/.installed $(USERSPACE_DEPS)
@@ -44882,60 +45032,78 @@ exit 0
 +distclean: clean
 +	rm -rf $(DISTFILES_PATH)
 +
++cacheclean: clean
++ifneq ($(CCACHE_DIR),)
++	rm -rf $(CCACHE_DIR)
++endif
++
 +menuconfig: $(KERNEL_BUILD_PATH)/.config
 +	$(MAKE) -C $(KERNEL_PATH) O=$(KERNEL_BUILD_PATH) ARCH=$(KERNEL_ARCH) CROSS_COMPILE=$(CROSS_COMPILE) menuconfig
 +
-+.PHONY: qemu build clean distclean menuconfig
++.PHONY: qemu build clean distclean cacheclean menuconfig
 +.DELETE_ON_ERROR:
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/aarch64.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/aarch64.config
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,8 @@
 +CONFIG_SERIAL_AMBA_PL011=y
 +CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_VIRTIO_MENU=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyAMA0 wg.success=ttyAMA1"
++CONFIG_CMDLINE="console=ttyAMA0 wg.success=vport0p1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1280
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/aarch64_be.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/aarch64_be.config
-@@ -0,0 +1,6 @@
-+CONFIG_CPU_BIG_ENDIAN=y
-+CONFIG_SERIAL_AMBA_PL011=y
-+CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
-+CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyAMA0 wg.success=ttyAMA1"
-+CONFIG_FRAME_WARN=1280
---- /dev/null
-+++ b/tools/testing/selftests/wireguard/qemu/arch/arm.config
 @@ -0,0 +1,9 @@
++CONFIG_CPU_BIG_ENDIAN=y
++CONFIG_SERIAL_AMBA_PL011=y
++CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_VIRTIO_MENU=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_CONSOLE=y
++CONFIG_CMDLINE_BOOL=y
++CONFIG_CMDLINE="console=ttyAMA0 wg.success=vport0p1 panic_on_warn=1"
++CONFIG_FRAME_WARN=1280
+--- b/tools/testing/selftests/wireguard/qemu/arch/arm.config
++++ b/tools/testing/selftests/wireguard/qemu/arch/arm.config
+@@ -0,0 +1,12 @@
 +CONFIG_MMU=y
 +CONFIG_ARCH_MULTI_V7=y
 +CONFIG_ARCH_VIRT=y
 +CONFIG_THUMB2_KERNEL=n
 +CONFIG_SERIAL_AMBA_PL011=y
 +CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_VIRTIO_MENU=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyAMA0 wg.success=ttyAMA1"
++CONFIG_CMDLINE="console=ttyAMA0 wg.success=vport0p1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/armeb.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/armeb.config
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,13 @@
 +CONFIG_MMU=y
 +CONFIG_ARCH_MULTI_V7=y
 +CONFIG_ARCH_VIRT=y
 +CONFIG_THUMB2_KERNEL=n
 +CONFIG_SERIAL_AMBA_PL011=y
 +CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_VIRTIO_MENU=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyAMA0 wg.success=ttyAMA1"
++CONFIG_CMDLINE="console=ttyAMA0 wg.success=vport0p1 panic_on_warn=1"
 +CONFIG_CPU_BIG_ENDIAN=y
 +CONFIG_FRAME_WARN=1024
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/i686.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/i686.config
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,6 @@
++CONFIG_ACPI=y
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
 --- b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
@@ -44947,9 +45115,9 @@ exit 0
 +CONFIG_SERIAL_PMACZILOG=y
 +CONFIG_SERIAL_PMACZILOG_TTYS=y
 +CONFIG_SERIAL_PMACZILOG_CONSOLE=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/mips.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips.config
 @@ -0,0 +1,11 @@
 +CONFIG_CPU_MIPS32_R2=y
@@ -44961,9 +45129,9 @@ exit 0
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/mips64.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips64.config
 @@ -0,0 +1,14 @@
 +CONFIG_64BIT=y
@@ -44978,9 +45146,9 @@ exit 0
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1280
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/mips64el.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips64el.config
 @@ -0,0 +1,15 @@
 +CONFIG_64BIT=y
@@ -44996,9 +45164,9 @@ exit 0
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1280
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/mipsel.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mipsel.config
 @@ -0,0 +1,12 @@
 +CONFIG_CPU_MIPS32_R2=y
@@ -45011,9 +45179,9 @@ exit 0
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/powerpc.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc.config
 @@ -0,0 +1,10 @@
 +CONFIG_PPC_QEMU_E500=y
@@ -45024,7 +45192,7 @@ exit 0
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_MATH_EMULATION=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1024
 --- b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
@@ -45038,19 +45206,20 @@ exit 0
 +CONFIG_HVC_CONSOLE=y
 +CONFIG_CPU_LITTLE_ENDIAN=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=hvc0 wg.success=hvc1"
++CONFIG_CMDLINE="console=hvc0 wg.success=hvc1 panic_on_warn=1"
 +CONFIG_SECTION_MISMATCH_WARN_ONLY=y
 +CONFIG_FRAME_WARN=1280
 +CONFIG_THREAD_SHIFT=14
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/arch/x86_64.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/x86_64.config
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,6 @@
++CONFIG_ACPI=y
 +CONFIG_SERIAL_8250=y
 +CONFIG_SERIAL_8250_CONSOLE=y
 +CONFIG_CMDLINE_BOOL=y
-+CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
++CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1 panic_on_warn=1"
 +CONFIG_FRAME_WARN=1280
---- /dev/null
+--- b/tools/testing/selftests/wireguard/qemu/debug.config
 +++ b/tools/testing/selftests/wireguard/qemu/debug.config
 @@ -0,0 +1,67 @@
 +CONFIG_LOCALVERSION="-debug"
@@ -45105,7 +45274,7 @@ exit 0
 +CONFIG_TRACE_IRQFLAGS=y
 +CONFIG_DEBUG_BUGVERBOSE=y
 +CONFIG_DEBUG_LIST=y
-+CONFIG_DEBUG_PI_LIST=y
++CONFIG_DEBUG_PLIST=y
 +CONFIG_PROVE_RCU=y
 +CONFIG_SPARSE_RCU_POINTER=y
 +CONFIG_RCU_CPU_STALL_TIMEOUT=21
@@ -45122,7 +45291,7 @@ exit 0
 +CONFIG_DEBUG_WW_MUTEX_SLOWPATH=y
 --- b/tools/testing/selftests/wireguard/qemu/init.c
 +++ b/tools/testing/selftests/wireguard/qemu/init.c
-@@ -0,0 +1,284 @@
+@@ -0,0 +1,266 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -45181,26 +45350,14 @@ exit 0
 +
 +static void seed_rng(void)
 +{
-+	int fd;
-+	struct {
-+		int entropy_count;
-+		int buffer_size;
-+		unsigned char buffer[256];
-+	} entropy = {
-+		.entropy_count = sizeof(entropy.buffer) * 8,
-+		.buffer_size = sizeof(entropy.buffer),
-+		.buffer = "Adding real entropy is not actually important for these tests. Don't try this at home, kids!"
-+	};
++	int bits = 256, fd;
 +
-+	if (mknod("/dev/urandom", S_IFCHR | 0644, makedev(1, 9)))
-+		panic("mknod(/dev/urandom)");
-+	fd = open("/dev/urandom", O_WRONLY);
++	pretty_message("[+] Fake seeding RNG...");
++	fd = open("/dev/random", O_WRONLY);
 +	if (fd < 0)
-+		panic("open(urandom)");
-+	for (int i = 0; i < 256; ++i) {
-+		if (ioctl(fd, RNDADDENTROPY, &entropy) < 0)
-+			panic("ioctl(urandom)");
-+	}
++		panic("open(random)");
++	if (ioctl(fd, RNDADDTOENTCNT, &bits) < 0)
++		panic("ioctl(RNDADDTOENTCNT)");
 +	close(fd);
 +}
 +
@@ -45245,12 +45402,6 @@ exit 0
 +	if (fd >= 0) {
 +		if (write(fd, "1\n", 2) != 2)
 +			panic("write(exception-trace)");
-+		close(fd);
-+	}
-+	fd = open("/proc/sys/kernel/panic_on_warn", O_WRONLY);
-+	if (fd >= 0) {
-+		if (write(fd, "1\n", 2) != 2)
-+			panic("write(panic_on_warn)");
 +		close(fd);
 +	}
 +}
@@ -45395,10 +45546,10 @@ exit 0
 +
 +int main(int argc, char *argv[])
 +{
-+	seed_rng();
 +	ensure_console();
 +	print_banner();
 +	mount_filesystems();
++	seed_rng();
 +	kmod_selftests();
 +	enable_logging();
 +	clear_leaks();
@@ -45409,7 +45560,7 @@ exit 0
 +}
 --- b/tools/testing/selftests/wireguard/qemu/kernel.config
 +++ b/tools/testing/selftests/wireguard/qemu/kernel.config
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,90 @@
 +CONFIG_LOCALVERSION=""
 +CONFIG_NET=y
 +CONFIG_NETDEVICES=y
@@ -45479,6 +45630,7 @@ exit 0
 +CONFIG_SYSFS=y
 +CONFIG_TMPFS=y
 +CONFIG_CONSOLE_LOGLEVEL_DEFAULT=15
++CONFIG_LOG_BUF_SHIFT=18
 +CONFIG_PRINTK_TIME=y
 +CONFIG_BLK_DEV_INITRD=y
 +CONFIG_LEGACY_VSYSCALL_NONE=y
@@ -45540,3 +45692,73 @@ exit 0
 @@ -0,0 +1,2 @@
 +# SPDX-License-Identifier: GPL-2.0-only
 +poly1305-core.S
+--- a/include/net/dst_cache.h
++++ b/include/net/dst_cache.h
+@@ -79,6 +79,17 @@ static inline void dst_cache_reset(struct dst_cache *dst_cache)
+ 	dst_cache->reset_ts = jiffies;
+ }
+ 
++/**
++ *	dst_cache_reset_now - invalidate the cache contents immediately
++ *	@dst_cache: the cache
++ *
++ *	The caller must be sure there are no concurrent users, as this frees
++ *	all dst_cache users immediately, rather than waiting for the next
++ *	per-cpu usage like dst_cache_reset does. Most callers should use the
++ *	higher speed lazily-freed dst_cache_reset function instead.
++ */
++void dst_cache_reset_now(struct dst_cache *dst_cache);
++
+ /**
+  *	dst_cache_init - initialize the cache, allocating the required storage
+  *	@dst_cache: the cache
+--- a/net/core/dst_cache.c
++++ b/net/core/dst_cache.c
+@@ -162,3 +162,22 @@ void dst_cache_destroy(struct dst_cache *dst_cache)
+ 	free_percpu(dst_cache->cache);
+ }
+ EXPORT_SYMBOL_GPL(dst_cache_destroy);
++
++void dst_cache_reset_now(struct dst_cache *dst_cache)
++{
++	int i;
++
++	if (!dst_cache->cache)
++		return;
++
++	dst_cache->reset_ts = jiffies;
++	for_each_possible_cpu(i) {
++		struct dst_cache_pcpu *idst = per_cpu_ptr(dst_cache->cache, i);
++		struct dst_entry *dst = idst->dst;
++
++		idst->cookie = 0;
++		idst->dst = NULL;
++		dst_release(dst);
++	}
++}
++EXPORT_SYMBOL_GPL(dst_cache_reset_now);
+--- b/tools/testing/selftests/wireguard/qemu/arch/powerpc64.config
++++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc64.config
+@@ -0,0 +1,13 @@
++CONFIG_PPC64=y
++CONFIG_PPC_PSERIES=y
++CONFIG_ALTIVEC=y
++CONFIG_VSX=y
++CONFIG_PPC_OF_BOOT_TRAMPOLINE=y
++CONFIG_PPC_RADIX_MMU=y
++CONFIG_HVC_CONSOLE=y
++CONFIG_CPU_BIG_ENDIAN=y
++CONFIG_CMDLINE_BOOL=y
++CONFIG_CMDLINE="console=hvc0 wg.success=hvc1 panic_on_warn=1"
++CONFIG_SECTION_MISMATCH_WARN_ONLY=y
++CONFIG_FRAME_WARN=1280
++CONFIG_THREAD_SHIFT=14
+--- b/tools/testing/selftests/wireguard/qemu/arch/s390x.config
++++ b/tools/testing/selftests/wireguard/qemu/arch/s390x.config
+@@ -0,0 +1,6 @@
++CONFIG_SCLP_VT220_TTY=y
++CONFIG_SCLP_VT220_CONSOLE=y
++CONFIG_VIRTIO_MENU=y
++CONFIG_VIRTIO_CONSOLE=y
++CONFIG_S390_GUEST=y
++CONFIG_CMDLINE="console=ttysclp0 wg.success=vport0p1 panic_on_warn=1"
