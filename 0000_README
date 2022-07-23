@@ -265,7 +265,7 @@ Desc:   Linux 5.15.55
 
 Patch:  1055_linux-5.15.56.patch
 From:   http://www.kernel.org
-Desc:   Linux 5.15.57
+Desc:   Linux 5.15.56
 
 Patch:  1056_linux-5.15.57.patch
 From:   http://www.kernel.org
