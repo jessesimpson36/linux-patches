@@ -1,0 +1,82 @@
+From ebc4c1bcc2a513bb2292dc73aa247b046bc846ce Mon Sep 17 00:00:00 2001
+From: Liam Howlett <liam.howlett@oracle.com>
+Date: Wed, 11 Jan 2023 20:02:07 +0000
+Subject: maple_tree: fix mas_empty_area_rev() lower bound validation
+
+mas_empty_area_rev() was not correctly validating the start of a gap
+against the lower limit.  This could lead to the range starting lower than
+the requested minimum.
+
+Fix the issue by better validating a gap once one is found.
+
+This commit also adds tests to the maple tree test suite for this issue
+and tests the mas_empty_area() function for similar bound checking.
+
+Link: https://lkml.kernel.org/r/20230111200136.1851322-1-Liam.Howlett@oracle.com
+Link: https://bugzilla.kernel.org/show_bug.cgi?id=216911
+Fixes: 54a611b60590 ("Maple Tree: add new data structure")
+Signed-off-by: Liam R. Howlett <Liam.Howlett@oracle.com>
+Reported-by: <amanieu@gmail.com>
+  Link: https://lore.kernel.org/linux-mm/0b9f5425-08d4-8013-aa4c-e620c3b10bb2@leemhuis.info/
+Tested-by: Holger Hoffsttte <holger@applied-asynchrony.com>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+ lib/maple_tree.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+(limited to 'lib/maple_tree.c')
+
+diff --git a/lib/maple_tree.c b/lib/maple_tree.c
+index 26e2045d3cda9..b990ccea454ec 100644
+--- a/lib/maple_tree.c
++++ b/lib/maple_tree.c
+@@ -4887,7 +4887,7 @@ static bool mas_rev_awalk(struct ma_state *mas, unsigned long size)
+ 	unsigned long *pivots, *gaps;
+ 	void __rcu **slots;
+ 	unsigned long gap = 0;
+-	unsigned long max, min, index;
++	unsigned long max, min;
+ 	unsigned char offset;
+ 
+ 	if (unlikely(mas_is_err(mas)))
+@@ -4909,8 +4909,7 @@ static bool mas_rev_awalk(struct ma_state *mas, unsigned long size)
+ 		min = mas_safe_min(mas, pivots, --offset);
+ 
+ 	max = mas_safe_pivot(mas, pivots, offset, type);
+-	index = mas->index;
+-	while (index <= max) {
++	while (mas->index <= max) {
+ 		gap = 0;
+ 		if (gaps)
+ 			gap = gaps[offset];
+@@ -4941,10 +4940,8 @@ static bool mas_rev_awalk(struct ma_state *mas, unsigned long size)
+ 		min = mas_safe_min(mas, pivots, offset);
+ 	}
+ 
+-	if (unlikely(index > max)) {
+-		mas_set_err(mas, -EBUSY);
+-		return false;
+-	}
++	if (unlikely((mas->index > max) || (size - 1 > max - mas->index)))
++		goto no_space;
+ 
+ 	if (unlikely(ma_is_leaf(type))) {
+ 		mas->offset = offset;
+@@ -4961,9 +4958,11 @@ static bool mas_rev_awalk(struct ma_state *mas, unsigned long size)
+ 	return false;
+ 
+ ascend:
+-	if (mte_is_root(mas->node))
+-		mas_set_err(mas, -EBUSY);
++	if (!mte_is_root(mas->node))
++		return false;
+ 
++no_space:
++	mas_set_err(mas, -EBUSY);
+ 	return false;
+ }
+ 
+-- 
+cgit 
+

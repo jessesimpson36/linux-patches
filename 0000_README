@@ -75,6 +75,10 @@ Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:		https://github.com/KSPP/linux/issues/109
 Desc:		Address -Warray-bounds warnings 
 
+Patch:  1800_maple-tree-fix-mas-empty-area-rev-lower-bound-val.patch
+From:		https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Desc:		maple_tree: fix mas_empty_area_rev() lower bound validation
+
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
