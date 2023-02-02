@@ -1,0 +1,11 @@
+--- a/scripts/gcc-plugins/Makefile	2023-02-02 14:12:55.366308720 -0500
++++ b/scripts/gcc-plugins/Makefile	2023-02-02 14:13:41.066530357 -0500
+@@ -2,7 +2,7 @@
+ GCC_PLUGINS_DIR := $(shell $(CC) -print-file-name=plugin)
+ 
+ HOSTLIBS := hostcxxlibs
+-HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -std=gnu++11 -fno-rtti
++HOST_EXTRACXXFLAGS += -I$(GCC_PLUGINS_DIR)/include -I$(src) -fno-rtti
+ HOST_EXTRACXXFLAGS += -fno-exceptions -fasynchronous-unwind-tables -ggdb
+ HOST_EXTRACXXFLAGS += -Wno-narrowing -Wno-unused-variable
+ HOST_EXTRACXXFLAGS += -Wno-format-diag

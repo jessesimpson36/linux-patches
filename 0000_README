@@ -991,6 +991,10 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
+Patch:  2940_gcc-plugins-drop-std-gnu-plus-plus-to-fix-GCC-13-build.patch
+From:   https://lore.kernel.org/all/20230201230009.2252783-1-sam@gentoo.org/
+Desc:   gcc-plugins: drop -std=gnu++11 to fix GCC 13 build
+
 Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
