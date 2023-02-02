@@ -115,6 +115,10 @@ Patch:	2930_gcc-plugins-Reorg-gimple-incs-for-gcc-13.patch
 From:   https://lore.kernel.org/lkml/mhng-8bc81919-3023-4d72-bd44-2443606b4fd7@palmer-ri-x1c9a/T/
 Desc:   gcc-plugins: Reorganize gimple includes for GCC 13
 
+Patch:  2940_gcc-plugins-drop-std-gnu-plus-plus-to-fix-GCC-13-build.patch
+From:   https://lore.kernel.org/all/20230201230009.2252783-1-sam@gentoo.org/
+Desc:   gcc-plugins: drop -std=gnu++11 to fix GCC 13 build
+
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
