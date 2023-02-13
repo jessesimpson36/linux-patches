@@ -134,3 +134,11 @@ Desc:   Add Gentoo Linux support config settings and defaults.
 Patch:  5010_enable-cpu-optimizations-universal.patch
 From:   https://github.com/graysky2/kernel_compiler_patch
 Desc:   Kernel >= 5.15 patch enables gcc = v11.1+ optimizations for additional CPUs.
+
+Patch:  5020_BMQ-and-PDS-io-scheduler-v6.1-r4-linux-tkg.patch
+From:   https://github.com/Frogging-Family/linux-tkghttps://gitlab.com/alfredchen/projectc
+Desc:   BMQ(BitMap Queue) Scheduler. A new CPU scheduler developed from PDS(incld). Inspired by the scheduler in zircon.
+
+Patch:  5021_BMQ-and-PDS-gentoo-defaults.patch
+From:   https://gitweb.gentoo.org/proj/linux-patches.git/
+Desc:   Set defaults for BMQ. Add archs as people test, default to N
