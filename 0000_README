@@ -44,679 +44,679 @@ Individual Patch Descriptions:
 --------------------------------------------------------------------------
 
 Patch:  1000_linux-5.10.1.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.1
 
 Patch:  1001_linux-5.10.2.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.2
 
 Patch:  1002_linux-5.10.3.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.3
 
 Patch:  1003_linux-5.10.4.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.4
 
 Patch:  1004_linux-5.10.5.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.5
 
 Patch:  1005_linux-5.10.6.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.6
 
 Patch:  1006_linux-5.10.7.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.7
 
 Patch:  1007_linux-5.10.8.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.8
 
 Patch:  1008_linux-5.10.9.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.9
 
 Patch:  1009_linux-5.10.10.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.10
 
 Patch:  1010_linux-5.10.11.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.11
 
 Patch:  1011_linux-5.10.12.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.12
 
 Patch:  1012_linux-5.10.13.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.13
 
 Patch:  1013_linux-5.10.14.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.14
 
 Patch:  1014_linux-5.10.15.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.15
 
 Patch:  1015_linux-5.10.16.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.16
 
 Patch:  1016_linux-5.10.17.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.17
 
 Patch:  1017_linux-5.10.18.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.18
 
 Patch:  1018_linux-5.10.19.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.19
 
 Patch:  1019_linux-5.10.20.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.20
 
 Patch:  1020_linux-5.10.21.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.21
 
 Patch:  1021_linux-5.10.22.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.22
 
 Patch:  1022_linux-5.10.23.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.23
 
 Patch:  1023_linux-5.10.24.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.24
 
 Patch:  1024_linux-5.10.25.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.25
 
 Patch:  1025_linux-5.10.26.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.26
 
 Patch:  1026_linux-5.10.27.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.27
 
 Patch:  1027_linux-5.10.28.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.28
 
 Patch:  1028_linux-5.10.29.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.29
 
 Patch:  1029_linux-5.10.30.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.30
 
 Patch:  1030_linux-5.10.31.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.31
 
 Patch:  1031_linux-5.10.32.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.32
 
 Patch:  1032_linux-5.10.33.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.33
 
 Patch:  1033_linux-5.10.34.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.34
 
 Patch:  1034_linux-5.10.35.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.35
 
 Patch:  1035_linux-5.10.36.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.36
 
 Patch:  1036_linux-5.10.37.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.37
 
 Patch:  1037_linux-5.10.38.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.38
 
 Patch:  1038_linux-5.10.39.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.39
 
 Patch:  1039_linux-5.10.40.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.40
 
 Patch:  1040_linux-5.10.41.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.41
 
 Patch:  1041_linux-5.10.42.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.42
 
 Patch:  1042_linux-5.10.43.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.43
 
 Patch:  1043_linux-5.10.44.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.44
 
 Patch:  1044_linux-5.10.45.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.45
 
 Patch:  1045_linux-5.10.46.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.46
 
 Patch:  1046_linux-5.10.47.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.47
 
 Patch:  1047_linux-5.10.48.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.48
 
 Patch:  1048_linux-5.10.49.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.49
 
 Patch:  1049_linux-5.10.50.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.50
 
 Patch:  1050_linux-5.10.51.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.51
 
 Patch:  1051_linux-5.10.52.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.52
 
 Patch:  1052_linux-5.10.53.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.53
 
 Patch:  1053_linux-5.10.54.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.54
 
 Patch:  1054_linux-5.10.55.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.55
 
 Patch:  1055_linux-5.10.56.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.56
 
 Patch:  1056_linux-5.10.57.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.57
 
 Patch:  1057_linux-5.10.58.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.58
 
 Patch:  1058_linux-5.10.59.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.59
 
 Patch:  1059_linux-5.10.60.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.60
 
 Patch:  1060_linux-5.10.61.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.61
 
 Patch:  1061_linux-5.10.62.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.62
 
 Patch:  1062_linux-5.10.63.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.63
 
 Patch:  1063_linux-5.10.64.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.64
 
 Patch:  1064_linux-5.10.65.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.65
 
 Patch:  1065_linux-5.10.66.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.66
 
 Patch:  1066_linux-5.10.67.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.67
 
 Patch:  1067_linux-5.10.68.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.68
 
 Patch:  1068_linux-5.10.69.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.69
 
 Patch:  1069_linux-5.10.70.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.70
 
 Patch:  1070_linux-5.10.71.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.71
 
 Patch:  1071_linux-5.10.72.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.72
 
 Patch:  1072_linux-5.10.73.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.73
 
 Patch:  1073_linux-5.10.74.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.74
 
 Patch:  1074_linux-5.10.75.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.75
 
 Patch:  1075_linux-5.10.76.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.76
 
 Patch:  1076_linux-5.10.77.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.77
 
 Patch:  1077_linux-5.10.78.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.78
 
 Patch:  1078_linux-5.10.79.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.79
 
 Patch:  1079_linux-5.10.80.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.80
 
 Patch:  1080_linux-5.10.81.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.81
 
 Patch:  1081_linux-5.10.82.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.82
 
 Patch:  1082_linux-5.10.83.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.83
 
 Patch:  1083_linux-5.10.84.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.84
 
 Patch:  1084_linux-5.10.85.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.85
 
 Patch:  1085_linux-5.10.86.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.86
 
 Patch:  1086_linux-5.10.87.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.87
 
 Patch:  1087_linux-5.10.88.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.88
 
 Patch:  1088_linux-5.10.89.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.89
 
 Patch:  1089_linux-5.10.90.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.90
 
 Patch:  1090_linux-5.10.91.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.91
 
 Patch:  1091_linux-5.10.92.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.92
 
 Patch:  1092_linux-5.10.93.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.93
 
 Patch:  1093_linux-5.10.94.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.94
 
 Patch:  1094_linux-5.10.95.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.95
 
 Patch:  1095_linux-5.10.96.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.96
 
 Patch:  1096_linux-5.10.97.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.97
 
 Patch:  1097_linux-5.10.98.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.98
 
 Patch:  1098_linux-5.10.99.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.99
 
 Patch:  1099_linux-5.10.100.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.100
 
 Patch:  1100_linux-5.10.101.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.101
 
 Patch:  1101_linux-5.10.102.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.102
 
 Patch:  1102_linux-5.10.103.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.103
 
 Patch:  1103_linux-5.10.104.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.104
 
 Patch:  1104_linux-5.10.105.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.105
 
 Patch:  1105_linux-5.10.106.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.106
 
 Patch:  1106_linux-5.10.107.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.107
 
 Patch:  1107_linux-5.10.108.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.108
 
 Patch:  1108_linux-5.10.109.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.109
 
 Patch:  1109_linux-5.10.110.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.110
 
 Patch:  1110_linux-5.10.111.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.111
 
 Patch:  1111_linux-5.10.112.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.112
 
 Patch:  1112_linux-5.10.113.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.113
 
 Patch:  1113_linux-5.10.114.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.114
 
 Patch:  1114_linux-5.10.115.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.115
 
 Patch:  1115_linux-5.10.116.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.116
 
 Patch:  1116_linux-5.10.117.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.117
 
 Patch:  1117_linux-5.10.118.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.118
 
 Patch:  1118_linux-5.10.119.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.119
 
 Patch:  1119_linux-5.10.120.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.120
 
 Patch:  1120_linux-5.10.121.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.121
 
 Patch:  1121_linux-5.10.122.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.122
 
 Patch:  1122_linux-5.10.123.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.123
 
 Patch:  1123_linux-5.10.124.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.124
 
 Patch:  1124_linux-5.10.125.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.125
 
 Patch:  1125_linux-5.10.126.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.126
 
 Patch:  1126_linux-5.10.127.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.127
 
 Patch:  1127_linux-5.10.128.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.128
 
 Patch:  1128_linux-5.10.129.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.129
 
 Patch:  1129_linux-5.10.130.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.130
 
 Patch:  1130_linux-5.10.131.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.131
 
 Patch:  1131_linux-5.10.132.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.132
 
 Patch:  1132_linux-5.10.133.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.133
 
 Patch:  1133_linux-5.10.134.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.134
 
 Patch:  1134_linux-5.10.135.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.135
 
 Patch:  1135_linux-5.10.136.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.136
 
 Patch:  1136_linux-5.10.137.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.137
 
 Patch:  1137_linux-5.10.138.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.138
 
 Patch:  1138_linux-5.10.139.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.139
 
 Patch:  1139_linux-5.10.140.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.140
 
 Patch:  1140_linux-5.10.141.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.141
 
 Patch:  1141_linux-5.10.142.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.142
 
 Patch:  1142_linux-5.10.143.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.143
 
 Patch:  1143_linux-5.10.144.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.144
 
 Patch:  1144_linux-5.10.145.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.145
 
 Patch:  1145_linux-5.10.146.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.146
 
 Patch:  1146_linux-5.10.147.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.147
 
 Patch:  1147_linux-5.10.148.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.148
 
 Patch:  1148_linux-5.10.149.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.149
 
 Patch:  1149_linux-5.10.150.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.150
 
 Patch:  1150_linux-5.10.151.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.151
 
 Patch:  1151_linux-5.10.152.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.152
 
 Patch:  1152_linux-5.10.153.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.153
 
 Patch:  1153_linux-5.10.154.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.154
 
 Patch:  1154_linux-5.10.155.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.155
 
 Patch:  1155_linux-5.10.156.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.156
 
 Patch:  1156_linux-5.10.157.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.157
 
 Patch:  1157_linux-5.10.158.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.158
 
 Patch:  1158_linux-5.10.159.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.159
 
 Patch:  1159_linux-5.10.160.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.160
 
 Patch:  1160_linux-5.10.161.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.161
 
 Patch:  1161_linux-5.10.162.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.162
 
 Patch:  1162_linux-5.10.163.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.163
 
 Patch:  1163_linux-5.10.164.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.164
 
 Patch:  1164_linux-5.10.165.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.165
 
 Patch:  1165_linux-5.10.166.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.166
 
 Patch:  1166_linux-5.10.167.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.167
 
 Patch:  1167_linux-5.10.168.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.168
 
 Patch:  1168_linux-5.10.169.patch
-From:   http://www.kernel.org
+From:   https://www.kernel.org
 Desc:   Linux 5.10.169
 
 Patch:  1500_XATTR_USER_PREFIX.patch
