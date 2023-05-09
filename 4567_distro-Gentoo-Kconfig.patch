@@ -300,18 +300,6 @@
 +		See the settings that become available for more details and fine-tuning.
 +
 +endmenu
-diff --git a/security/selinux/Kconfig b/security/selinux/Kconfig
-index 9e921fc72..f29bc13fa 100644
---- a/security/selinux/Kconfig
-+++ b/security/selinux/Kconfig
-@@ -26,6 +26,7 @@ config SECURITY_SELINUX_BOOTPARAM
- config SECURITY_SELINUX_DISABLE
- 	bool "NSA SELinux runtime disable"
- 	depends on SECURITY_SELINUX
-+	depends on !GENTOO_KERNEL_SELF_PROTECTION
- 	select SECURITY_WRITABLE_HOOKS
- 	default n
- 	help
 -- 
 2.31.1
 
