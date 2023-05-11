@@ -163,10 +163,6 @@ Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
 Desc:   Enable link security restrictions by default.
 
-Patch:  1520_fs-enable-link-security-restrictions-by-default.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/?id=c1592a89942e9678f7d9c8030efa777c0d57edab
-Desc:   netfilter: nf_tables: deactivate anonymous set from preparation phase
-
 Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:		https://github.com/KSPP/linux/issues/109
 Desc:		Address -Warray-bounds warnings 
