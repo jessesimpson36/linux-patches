@@ -159,9 +159,9 @@ Patch:  1028_linux-6.1.29.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.29
 
-Patch:  1029_linux-6.1.30.patch
+Patch:  1030_linux-6.1.31.patch
 From:   https://www.kernel.org
-Desc:   Linux 6.1.30
+Desc:   Linux 6.1.31
 
 Patch:  1500_XATTR_USER_PREFIX.patch
 From:   https://bugs.gentoo.org/show_bug.cgi?id=470644
