@@ -187,10 +187,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2100_io-uring-undeprecate-epoll-ctl-support.patch
-From:   https://patchwork.kernel.org/project/io-uring/patch/20230506095502.13401-1-info@bnoordhuis.nl/
-Desc:   io_uring: undeprecate epoll_ctl support
-
 Patch:  2900_tmp513-Fix-build-issue-by-selecting-CONFIG_REG.patch
 From:   https://bugs.gentoo.org/710790
 Desc:   tmp513 requies REGMAP_I2C to build.  Select it by default in Kconfig. See bug #710790. Thanks to Phil Stracchino
