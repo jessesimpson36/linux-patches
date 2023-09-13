@@ -283,10 +283,6 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
-Patch:  2930_tpm-Enable-hwrng-for-Pluton-on-AMD-CPUs.patch
-From:   https://lore.kernel.org/all/20230822231510.2263255-1-jarkko@kernel.org/
-Desc:   tpm: Enable hwrng only for Pluton on AMD CPUs
-
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
