@@ -122,7 +122,7 @@
 +	depends on GENTOO_LINUX && GENTOO_LINUX_UDEV
 +
 +	select AUTOFS_FS
-+	select BLK_DEV_BSG
++	select BLK_DEV_BSG if SCSI
 +	select BPF_SYSCALL
 +	select CGROUP_BPF
 +	select CGROUPS
