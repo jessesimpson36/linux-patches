@@ -55,6 +55,10 @@ Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:		https://github.com/KSPP/linux/issues/109
 Desc:		Address -Warray-bounds warnings 
 
+Patch:  1720_parisc-gen-mmap-top-down-layout-and-brk-randomization.patch
+From:		https://lore.kernel.org/linux-parisc/ZVH2qeS1bG7%2F1J%2Fl@p100/T/#u
+Desc:		Fix the mmap_base() calculation to include the stack-grows-upwards case
+
 Patch:  1805_mm-disable-CONFIG-PER-VMA-LOCK-by-def.patch
 From:   https://lore.kernel.org/all/20230703182150.2193578-1-surenb@google.com/
 Desc:   mm: disable CONFIG_PER_VMA_LOCK by default until its fixed
