@@ -63,10 +63,6 @@ Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:		https://github.com/KSPP/linux/issues/109
 Desc:		Address -Warray-bounds warnings 
 
-Patch:  1720_parisc-gen-mmap-top-down-layout-and-brk-randomization.patch
-From:		https://lore.kernel.org/linux-parisc/ZVH2qeS1bG7%2F1J%2Fl@p100/T/#u
-Desc:		Fix the mmap_base() calculation to include the stack-grows-upwards case
-
 Patch:  1730_parisc-Disable-prctl.patch
 From:	  https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:	  prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
