@@ -615,6 +615,10 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2010_Fix_randomize_layout_crash_in_struct_neigh.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net.git/commit/?id=45b3fae4675d
+Desc:   neighbour: Fix __randomize_layout crash in struct neighbour
+
 Patch:  2900_tmp513-Fix-build-issue-by-selecting-CONFIG_REG.patch
 From:   https://bugs.gentoo.org/710790
 Desc:   tmp513 requies REGMAP_I2C to build.  Select it by default in Kconfig. See bug #710790. Thanks to Phil Stracchino
