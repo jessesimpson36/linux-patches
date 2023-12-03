@@ -1,0 +1,20 @@
+--- a/drivers/net/wireless/intel/iwlwifi/pcie/trans-gen2.c	2023-12-03 06:18:46.682462627 -0500
++++ b//drivers/net/wireless/intel/iwlwifi/pcie/trans-gen2.c	2023-12-03 06:20:00.912230659 -0500
+@@ -161,7 +161,6 @@ void _iwl_trans_pcie_gen2_stop_device(st
+ 	if (test_and_clear_bit(STATUS_DEVICE_ENABLED, &trans->status)) {
+ 		IWL_DEBUG_INFO(trans,
+ 			       "DEVICE_ENABLED bit was set and is now cleared\n");
+-		iwl_pcie_synchronize_irqs(trans);
+ 		iwl_pcie_rx_napi_sync(trans);
+ 		iwl_txq_gen2_tx_free(trans);
+ 		iwl_pcie_rx_stop(trans);
+--- a/drivers/net/wireless/intel/iwlwifi/pcie/trans.c	2023-12-03 06:18:54.135764993 -0500
++++ b//drivers/net/wireless/intel/iwlwifi/pcie/trans.c	2023-12-03 06:20:20.688858491 -0500
+@@ -1263,7 +1263,6 @@ static void _iwl_trans_pcie_stop_device(
+ 	if (test_and_clear_bit(STATUS_DEVICE_ENABLED, &trans->status)) {
+ 		IWL_DEBUG_INFO(trans,
+ 			       "DEVICE_ENABLED bit was set and is now cleared\n");
+-		iwl_pcie_synchronize_irqs(trans);
+ 		iwl_pcie_rx_napi_sync(trans);
+ 		iwl_pcie_tx_stop(trans);
+ 		iwl_pcie_rx_stop(trans);
