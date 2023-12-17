@@ -83,10 +83,6 @@ Patch:  1730_parisc-Disable-prctl.patch
 From:	  https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:	  prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
 
-Patch:  1805_mm-disable-CONFIG-PER-VMA-LOCK-by-def.patch
-From:   https://lore.kernel.org/all/20230703182150.2193578-1-surenb@google.com/
-Desc:   mm: disable CONFIG_PER_VMA_LOCK by default until its fixed
-
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
