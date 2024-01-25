@@ -123,6 +123,18 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
+Patch:  2930_gcc14-btrfs-fix-kvcalloc-args-order.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Desc:   btrfs: fix kvcalloc() arguments order
+
+Patch:  2931_gcc14-drm-i915-Adapt-to-Walloc-size.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Desc:   drm: i915: Adapt to -Walloc-size
+
+Patch:  2932_gcc14-objtool-Fix-calloc-call-for-new-Walloc-size.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Desc:   objtool: Fix calloc call for new -Walloc-size
+
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
