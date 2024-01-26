@@ -115,6 +115,10 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2800_amdgpu-Adj-kmalloc-array-calls-for-new-Walloc-size.patch
+From:   sam@gentoo.org
+Desc:   amdgpu: Adjust kmalloc_array calls for new -Walloc-size
+
 Patch:  2900_tmp513-Fix-build-issue-by-selecting-CONFIG_REG.patch
 From:   https://bugs.gentoo.org/710790
 Desc:   tmp513 requies REGMAP_I2C to build.  Select it by default in Kconfig. See bug #710790. Thanks to Phil Stracchino
