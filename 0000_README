@@ -123,10 +123,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2010_ipmr-fix-kern-panic-when-forwarding-mcast-packets.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net.git
-Desc:   ipmr: fix kernel panic when forwarding mcast packets
-
 Patch:  2800_amdgpu-Adj-kmalloc-array-calls-for-new-Walloc-size.patch
 From:   sam@gentoo.org
 Desc:   amdgpu: Adjust kmalloc_array calls for new -Walloc-size
