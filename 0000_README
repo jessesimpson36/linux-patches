@@ -127,10 +127,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2700_solo6x10-mem-resource-reduction-fix.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-Desc:   media: solo6x10: replace max(a, min(b, c)) by clamp(b, a, c)
-
 Patch:  2800_amdgpu-Adj-kmalloc-array-calls-for-new-Walloc-size.patch
 From:   sam@gentoo.org
 Desc:   amdgpu: Adjust kmalloc_array calls for new -Walloc-size
