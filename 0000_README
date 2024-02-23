@@ -686,7 +686,3 @@ Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to 
 Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
-
-Patch:  5010_enable-cpu-optimizations-universal.patch
-From:   https://github.com/graysky2/kernel_compiler_patch
-Desc:   Kernel >= 5.15 patch enables gcc = v11.1+ optimizations for additional CPUs.
