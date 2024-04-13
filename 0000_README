@@ -147,6 +147,10 @@ Patch:  1025_linux-6.6.26.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.6.26
 
+Patch:  1026_linux-6.6.27.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.6.27
+
 Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
 Desc:   Enable link security restrictions by default.
