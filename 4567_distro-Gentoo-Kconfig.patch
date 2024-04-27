@@ -6,9 +6,9 @@
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2022-08-25 07:13:06.694086407 -0400
-+++ b/distro/Kconfig	2022-08-25 13:21:55.150660724 -0400
-@@ -0,0 +1,291 @@
+--- /dev/null	2024-04-27 13:10:54.188000027 -0400
++++ b/distro/Kconfig	2024-04-27 18:16:00.549054795 -0400
+@@ -0,0 +1,295 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -213,6 +213,10 @@
 +	select SLAB_FREELIST_HARDENED
 +	select SHUFFLE_PAGE_ALLOCATOR
 +	select SLUB_DEBUG
++	select UBSAN
++	select CC_HAS_UBSAN_BOUNDS_STRICT if !CC_HAS_UBSAN_ARRAY_BOUNDS
++	select UBSAN_BOUNDS
++	select UBSAN_SHIFT
 +	select PAGE_POISONING
 +	select PAGE_POISONING_NO_SANITY
 +	select PAGE_POISONING_ZERO
@@ -300,7 +304,6 @@
 +		See the settings that become available for more details and fine-tuning.
 +
 +endmenu
-diff --git a/security/selinux/Kconfig b/security/selinux/Kconfig
 index 9e921fc72..f29bc13fa 100644
 --- a/security/selinux/Kconfig
 +++ b/security/selinux/Kconfig
@@ -339,4 +342,3 @@ index 24c045b24..e13fc740c 100644
  	  This is the portion of low virtual memory which should be protected
 -- 
 2.31.1
-```
