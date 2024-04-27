@@ -6,9 +6,9 @@
  source "Documentation/Kconfig"
 +
 +source "distro/Kconfig"
---- /dev/null	2022-01-30 08:12:05.041788304 -0500
-+++ b/distro/Kconfig	2022-01-30 15:28:10.030352980 -0500
-@@ -0,0 +1,285 @@
+--- /dev/null	2024-04-27 13:10:54.188000027 -0400
++++ b/distro/Kconfig	2024-04-27 18:54:09.734564235 -0400
+@@ -0,0 +1,289 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -148,6 +148,10 @@
 +	select TIMERFD
 +	select TMPFS_POSIX_ACL
 +	select TMPFS_XATTR
++	select UBSAN
++	select CC_HAS_UBSAN_BOUNDS_STRICT if !CC_HAS_UBSAN_ARRAY_BOUNDS
++	select UBSAN_BOUNDS
++	select UBSAN_SHIFT
 +
 +	select ANON_INODES
 +	select BLOCK
