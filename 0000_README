@@ -171,10 +171,6 @@ Patch:  1730_parisc-Disable-prctl.patch
 From:	  https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:	  prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
 
-Patch:  1800_gcc-plugins-stackleak-Avoid-head-text-section.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-Desc:   gcc-plugins/stackleak: Avoid .head.text section
-
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
