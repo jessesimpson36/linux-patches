@@ -459,10 +459,6 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
-Patch:  2930_tar_override.patch
-From:   https://lore.kernel.org/lkml/20230412082743.350699-1-mgorny@gentoo.org/#t
-Desc:   kheaders: make it possible to override TAR
-
 Patch:  2940_handle-gcc-14-last-stmt-rename.patch
 From:   https://lore.kernel.org/all/20230811060545.never.564-kees@kernel.org/#Z31scripts:gcc-plugins:gcc-common.h
 Desc:   gcc-plugins: Rename last_stmt() for GCC 14+
