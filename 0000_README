@@ -183,8 +183,12 @@ Patch:  1034_linux-6.6.35.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.6.35
 
+Patch:  1035_linux-6.6.36.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.6.36
+
 Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
-From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
+From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch
 Desc:   Enable link security restrictions by default.
 
 Patch:  1700_sparc-address-warray-bound-warnings.patch
