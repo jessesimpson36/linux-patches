@@ -75,6 +75,10 @@ Patch:  1007_linux-6.9.8.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.9.8
 
+Patch:  1008_linux-6.9.9.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.9.9
+
 Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch
 Desc:   Enable link security restrictions by default.
