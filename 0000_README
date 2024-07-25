@@ -227,6 +227,14 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2010_netfilter-nf-tables-bail-if-stateful-expr-provides-no-clone.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Desc:   netfilter: nf_tables: bail out if stateful expression provides no .clone
+
+Patch:  2011_netfilter-nf-tables-allow-clone-callbacks-to-sleep.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Desc:   netfilter: nf_tables: allow clone callbacks to sleep
+
 Patch:  2700_ASoC_max98388_correct_includes.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/sound/soc/codecs/max98388.c?id=832beb640e425b5d1a92d8c2002e6b8e0af693eb
 Desc:   ASoC: max98388: Correct the includes
