@@ -731,10 +731,6 @@ Patch:  2950_kbuild-CRC32-1MB-dict-xz-modules.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/masahiroy/linux-kbuild.git/commit/?h=kbuild&id=fbf5892df21a8ccfcb2fda0fd65bc3169c89ed28
 Desc:   kbuild: Use CRC32 and a 1MiB dictionary for XZ compressed modules
 
-Patch:  2945_handle-gcc-14-last-stmt-rename.patch
-From:   https://lore.kernel.org/all/20230811060545.never.564-kees@kernel.org/#Z31scripts:gcc-plugins:gcc-common.h
-Desc:   gcc-plugins: Rename last_stmt() for GCC 14+
-
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
