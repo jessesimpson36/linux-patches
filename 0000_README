@@ -451,6 +451,10 @@ Patch:  1101_linux-6.1.102.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.102
 
+Patch:  1102_linux-6.1.103.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.1.103
+
 Patch:  1500_XATTR_USER_PREFIX.patch
 From:   https://bugs.gentoo.org/show_bug.cgi?id=470644
 Desc:   Support for namespace user.pax.* on tmpfs.
@@ -486,6 +490,10 @@ Desc:   sign-file: full functionality with modern LibreSSL
 Patch:  2950_kbuild-CRC32-1MB-dict-xz-modules.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/masahiroy/linux-kbuild.git/commit/?h=kbuild&id=fbf5892df21a8ccfcb2fda0fd65bc3169c89ed28
 Desc:   kbuild: Use CRC32 and a 1MiB dictionary for XZ compressed modules
+
+Patch:  2960_jump-label-fix.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/
+Desc:   jump_label: Fix a regression
 
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
