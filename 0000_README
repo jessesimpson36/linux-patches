@@ -215,6 +215,10 @@ Patch:  1042_linux-6.6.43.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.6.43
 
+Patch:  1043_linux-6.6.44.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.6.44
+
 Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch
 Desc:   Enable link security restrictions by default.
@@ -266,6 +270,10 @@ Desc:   drm: i915: Adapt to -Walloc-size
 Patch:  2932_gcc14-objtool-Fix-calloc-call-for-new-Walloc-size.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   objtool: Fix calloc call for new -Walloc-size
+
+Patch:  2950_jump-label-fix.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/
+Desc:   jump_label: Fix a regression
 
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
