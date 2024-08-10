@@ -275,6 +275,10 @@ Patch:  2950_jump-label-fix.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/
 Desc:   jump_label: Fix a regression
 
+Patch:  2990_libbpf-workaround-Wmaybe-uninitialized-false-pos.patch
+From:   https://lore.kernel.org/bpf/3ebbe7a4e93a5ddc3a26e2e11d329801d7c8de6b.1723217044.git.sam@gentoo.org/
+Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
+
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
