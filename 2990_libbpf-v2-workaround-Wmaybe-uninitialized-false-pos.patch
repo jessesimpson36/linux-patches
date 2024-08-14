@@ -1,8 +1,8 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH] libbpf: workaround -Wmaybe-uninitialized false positive
+Subject: [PATCH v2] libbpf: workaround -Wmaybe-uninitialized false positive
 From: Sam James <sam@gentoo.org>
-Date: Fri, 09 Aug 2024 16:24:04 +0100
-Message-Id: <3ebbe7a4e93a5ddc3a26e2e11d329801d7c8de6b.1723217044.git.sam@gentoo.org>
+Date: Fri, 09 Aug 2024 18:26:41 +0100
+Message-Id: <8f5c3b173e4cb216322ae19ade2766940c6fbebb.1723224401.git.sam@gentoo.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -37,28 +37,59 @@ here (see linked GCC bug). Suppress -Wmaybe-uninitialized accordingly.
 Link: https://gcc.gnu.org/PR114952
 Signed-off-by: Sam James <sam@gentoo.org>
 ---
- tools/lib/bpf/elf.c | 4 ++++
- 1 file changed, 4 insertions(+)
+v2: Fix Clang build.
+
+Range-diff against v1:
+1:  3ebbe7a4e93a ! 1:  8f5c3b173e4c libbpf: workaround -Wmaybe-uninitialized false positive
+    @@ tools/lib/bpf/elf.c: long elf_find_func_offset(Elf *elf, const char *binary_path
+      	return ret;
+      }
+      
+    ++#if !defined(__clang__)
+     +#pragma GCC diagnostic push
+     +/* https://gcc.gnu.org/PR114952 */
+     +#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+    ++#endif
+      /* Find offset of function name in ELF object specified by path. "name" matches
+       * symbol name or name@@LIB for library functions.
+       */
+    @@ tools/lib/bpf/elf.c: long elf_find_func_offset_from_file(const char *binary_path
+      	elf_close(&elf_fd);
+      	return ret;
+      }
+    ++#if !defined(__clang__)
+     +#pragma GCC diagnostic pop
+    ++#endif
+      
+      struct symbol {
+      	const char *name;
+
+ tools/lib/bpf/elf.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/tools/lib/bpf/elf.c b/tools/lib/bpf/elf.c
-index c92e02394159e..ee226bb8e1af0 100644
+index c92e02394159..7058425ca85b 100644
 --- a/tools/lib/bpf/elf.c
 +++ b/tools/lib/bpf/elf.c
-@@ -369,6 +369,9 @@ long elf_find_func_offset(Elf *elf, const char *binary_path, const char *name)
+@@ -369,6 +369,11 @@ long elf_find_func_offset(Elf *elf, const char *binary_path, const char *name)
  	return ret;
  }
  
++#if !defined(__clang__)
 +#pragma GCC diagnostic push
 +/* https://gcc.gnu.org/PR114952 */
 +#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
++#endif
  /* Find offset of function name in ELF object specified by path. "name" matches
   * symbol name or name@@LIB for library functions.
   */
-@@ -384,6 +387,7 @@ long elf_find_func_offset_from_file(const char *binary_path, const char *name)
+@@ -384,6 +389,9 @@ long elf_find_func_offset_from_file(const char *binary_path, const char *name)
  	elf_close(&elf_fd);
  	return ret;
  }
++#if !defined(__clang__)
 +#pragma GCC diagnostic pop
++#endif
  
  struct symbol {
  	const char *name;
