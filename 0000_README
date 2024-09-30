@@ -307,6 +307,10 @@ Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/3ebbe7a4e93a5ddc3a26e2e11d329801d7c8de6b.1723217044.git.sam@gentoo.org/
 Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
 
+Patch:  2995_dtrace-6.6_p2.patch
+From:   https://github.com/thesamesam/linux/blob/dtrace-sam/v2/6.6-flat
+Desc:   dtrace patch for 6.6.X (CTF, modules.builtin.objs)
+
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
