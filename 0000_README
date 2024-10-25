@@ -731,6 +731,10 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2005_netfilter-xtables-fix-typo.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net.git/commit/net/netfilter?id=306ed1728e8438caed30332e1ab46b28c25fe3d8
+Desc:   netfilter: xtables: fix typo causing some targets not to load on IPv6
+
 Patch:  2010_Fix_randomize_layout_crash_in_struct_neigh.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net.git/commit/?id=45b3fae4675d
 Desc:   neighbour: Fix __randomize_layout crash in struct neighbour
