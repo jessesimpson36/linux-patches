@@ -327,6 +327,18 @@ Patch:  2932_gcc14-objtool-Fix-calloc-call-for-new-Walloc-size.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   objtool: Fix calloc call for new -Walloc-size
 
+Patch:  2950_libsubcmd-silence-compiler-warning.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=7a4ffec9fd54ea27395e24dff726dbf58e2fe06b
+Desc:   libsubcmd: Silence compiler warning
+
+Patch:  2951_libbpf-Prevent-compiler-warnings-errors.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=7f4ec77f3fee41dd6a41f03a40703889e6e8f7b2
+Desc:   libbpf: Prevent compiler warnings/errors
+
+Patch:  2952_resolve-btfids-Fix-compiler-warnings.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=2c3d022abe6c3165109393b75a127b06c2c70063
+Desc:   resolve_btfids: Fix compiler warnings
+
 Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/3ebbe7a4e93a5ddc3a26e2e11d329801d7c8de6b.1723217044.git.sam@gentoo.org/
 Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
