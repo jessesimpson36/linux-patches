@@ -33,22 +33,14 @@ Acked-by: Arnaldo Carvalho de Melo <acme@redhat.com>
 Acked-by: Jiri Olsa <jolsa@kernel.org>
 Link: https://lore.kernel.org/bpf/20241022172329.3871958-4-ezulian@redhat.com
 ---
- tools/lib/subcmd/parse-options.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tools/lib/subcmd/parse-options.c b/tools/lib/subcmd/parse-options.c
-index eb896d30545b63..555d617c1f502a 100644
---- a/tools/lib/subcmd/parse-options.c
-+++ b/tools/lib/subcmd/parse-options.c
-@@ -807,7 +807,7 @@ static int option__cmp(const void *va, const void *vb)
+--- a/tools/lib/subcmd/parse-options.c	2024-11-01 07:47:50.842865849 -0400
++++ b/tools/lib/subcmd/parse-options.c	2024-11-01 07:48:28.656516527 -0400
+@@ -807,7 +807,7 @@ static int option__cmp(const void *va, c
  static struct option *options__order(const struct option *opts)
  {
- 	int nr_opts = 0, nr_group = 0, nr_parent = 0, len;
--	const struct option *o, *p = opts;
-+	const struct option *o = NULL, *p = opts;
- 	struct option *opt, *ordered = NULL, *group;
+ 	int nr_opts = 0, nr_group = 0, len;
+-	const struct option *o = opts;
++  const struct option *o = NULL, *p = opts;
+ 	struct option *opt, *ordered, *group;
  
- 	/* flatten the options that have parents */
--- 
-cgit 1.2.3-korg
-
+ 	for (o = opts; o->type != OPTION_END; o++)
