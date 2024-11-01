@@ -327,10 +327,6 @@ Patch:  2932_gcc14-objtool-Fix-calloc-call-for-new-Walloc-size.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   objtool: Fix calloc call for new -Walloc-size
 
-Patch:  2950_libsubcmd-silence-compiler-warning.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=7a4ffec9fd54ea27395e24dff726dbf58e2fe06b
-Desc:   libsubcmd: Silence compiler warning
-
 Patch:  2951_libbpf-Prevent-compiler-warnings-errors.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=7f4ec77f3fee41dd6a41f03a40703889e6e8f7b2
 Desc:   libbpf: Prevent compiler warnings/errors
