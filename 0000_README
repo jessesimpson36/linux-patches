@@ -43,17 +43,21 @@ EXPERIMENTAL
 Individual Patch Descriptions:
 --------------------------------------------------------------------------
 
+Patch:  1000_linux-6.12.1.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.12.1
+
 Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
 Desc:   Enable link security restrictions by default.
 
 Patch:  1700_sparc-address-warray-bound-warnings.patch
-From:		https://github.com/KSPP/linux/issues/109
-Desc:		Address -Warray-bounds warnings 
+From:   https://github.com/KSPP/linux/issues/109
+Desc:   Address -Warray-bounds warnings 
 
 Patch:  1730_parisc-Disable-prctl.patch
-From:	  https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
-Desc:	  prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
+Desc:   prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
 
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
