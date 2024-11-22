@@ -319,10 +319,6 @@ Patch:  2011_netfilter-nf-tables-allow-clone-callbacks-to-sleep.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   netfilter: nf_tables: allow clone callbacks to sleep
 
-Patch:  2400_bluetooth-mgmt-device-connected-fix.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/bluetooth/bluetooth-next.git
-Desc:   Bluetooth: hci_core: Fix calling mgmt_device_connected
-
 Patch:  2600_HID-revert-Y900P-fix-ThinkPad-L15-touchpad.patch
 From:   https://bugs.gentoo.org/942797
 Desc:   Revert: HID: multitouch: Add support for lenovo Y9000P Touchpad
