@@ -327,10 +327,6 @@ Patch:  2011_netfilter-nf-tables-allow-clone-callbacks-to-sleep.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   netfilter: nf_tables: allow clone callbacks to sleep
 
-Patch:  2600_HID-revert-Y900P-fix-ThinkPad-L15-touchpad.patch
-From:   https://bugs.gentoo.org/942797
-Desc:   Revert: HID: multitouch: Add support for lenovo Y9000P Touchpad
-
 Patch:  2700_ASoC_max98388_correct_includes.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/sound/soc/codecs/max98388.c?id=832beb640e425b5d1a92d8c2002e6b8e0af693eb
 Desc:   ASoC: max98388: Correct the includes
