@@ -543,10 +543,6 @@ Patch:  2010_Fix_randomize_layout_crash_in_struct_neigh.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net.git/commit/?id=45b3fae4675d
 Desc:   neighbour: Fix __randomize_layout crash in struct neighbour
 
-Patch:  2600_HID-revert-Y900P-fix-ThinkPad-L15-touchpad.patch
-From:   https://bugs.gentoo.org/942797
-Desc:   Revert: HID: multitouch: Add support for lenovo Y9000P Touchpad
-
 Patch:  2910_bfp-mark-get-entry-ip-as--maybe-unused.patch
 From:   https://www.spinics.net/lists/stable/msg604665.html
 Desc:   bpf: mark get_entry_ip as __maybe_unused
