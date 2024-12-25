@@ -335,6 +335,10 @@ Patch:  2011_netfilter-nf-tables-allow-clone-callbacks-to-sleep.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 Desc:   netfilter: nf_tables: allow clone callbacks to sleep
 
+Patch:  2400_wifi-rtw89-88xb-firmware patch
+From:   https://bugs.gentoo.org/946802
+Desc:   wifi: rtw89: 885xb: reset IDMEM mode to prevent download firmware failure
+
 Patch:  2700_ASoC_max98388_correct_includes.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/sound/soc/codecs/max98388.c?id=832beb640e425b5d1a92d8c2002e6b8e0af693eb
 Desc:   ASoC: max98388: Correct the includes
