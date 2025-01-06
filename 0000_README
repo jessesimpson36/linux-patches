@@ -355,6 +355,10 @@ Patch:  2700_ASoC_max98388_correct_includes.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/sound/soc/codecs/max98388.c?id=832beb640e425b5d1a92d8c2002e6b8e0af693eb
 Desc:   ASoC: max98388: Correct the includes
 
+Patch:  2710_drm-amdgpu-resume-handling-rework.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
+Desc:   drm/amdgpu: fix backport of commit 73dae652dcac
+
 Patch:  2800_amdgpu-Adj-kmalloc-array-calls-for-new-Walloc-size.patch
 From:   sam@gentoo.org
 Desc:   amdgpu: Adjust kmalloc_array calls for new -Walloc-size
