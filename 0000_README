@@ -419,10 +419,6 @@ Patch:  2952_resolve-btfids-Fix-compiler-warnings.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf-next.git/commit/?id=2c3d022abe6c3165109393b75a127b06c2c70063
 Desc:   resolve_btfids: Fix compiler warnings
 
-Patch:  2980_GCC15-gnu23-to-gnu11-fix.patch
-From:   https://lore.kernel.org/linux-kbuild/20241119044724.GA2246422@thelio-3990X/
-Desc:   GCC 15 defaults to -std=gnu23. Hack in CSTD_FLAG to pass -std=gnu11 everywhere.
-
 Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/3ebbe7a4e93a5ddc3a26e2e11d329801d7c8de6b.1723217044.git.sam@gentoo.org/
 Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
