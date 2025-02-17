@@ -131,10 +131,6 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
-Patch:  2980_GCC15-gnu23-to-gnu11-fix.patch
-From:   https://lore.kernel.org/linux-kbuild/20241119044724.GA2246422@thelio-3990X/
-Desc:   GCC 15 defaults to -std=gnu23. Hack in CSTD_FLAG to pass -std=gnu11 everywhere.
-
 Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/
 Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
