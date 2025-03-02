@@ -43,6 +43,58 @@ EXPERIMENTAL
 Individual Patch Descriptions:
 --------------------------------------------------------------------------
 
+Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
+From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
+Desc:   Enable link security restrictions by default.
+
+Patch:  1700_sparc-address-warray-bound-warnings.patch
+From:   https://github.com/KSPP/linux/issues/109
+Desc:   Address -Warray-bounds warnings 
+
+Patch:  1730_parisc-Disable-prctl.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
+Desc:   prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
+
+Patch:  1740_x86-insn-decoder-test-allow-longer-symbol-names.patch
+From:   https://gitlab.com/cki-project/kernel-ark/-/commit/8d4a52c3921d278f27241fc0c6949d8fdc13a7f5
+Desc:   x86/insn_decoder_test: allow longer symbol-names
+
+Patch:  1750_KVM-x86-Snapshot-hosts-DEBUGCTL.patch  
+From:   https://bugzilla.kernel.org/show_bug.cgi?id=219787
+Desc:   KVM: x86: Snapshot the host's DEBUGCTL in common x86
+
+Patch:  1751_KVM-SVM-Manually-zero-restore-DEBUGCTL.patch
+From:   https://bugzilla.kernel.org/show_bug.cgi?id=219787
+Desc:   KVM: SVM: Manually zero/restore DEBUGCTL if LBR virtualization is disabled
+
+Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
+From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
+Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
+
+Patch:  2901_permit-menuconfig-sorting.patch
+From:   https://lore.kernel.org/
+Desc:   menuconfig: Allow sorting the entries alphabetically
+
+Patch:  2910_bfp-mark-get-entry-ip-as--maybe-unused.patch
+From:   https://www.spinics.net/lists/stable/msg604665.html
+Desc:   bpf: mark get_entry_ip as __maybe_unused
+
+Patch:  2920_sign-file-patch-for-libressl.patch
+From:   https://bugs.gentoo.org/717166
+Desc:   sign-file: full functionality with modern LibreSSL
+
+Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
+From:   https://lore.kernel.org/bpf/
+Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
+
+Patch:  3000_Support-printing-firmware-info.patch
+From:   https://bugs.gentoo.org/732852
+Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
+
 Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
+
+Patch:  5010_enable-cpu-optimizations-universal.patch
+From:   https://github.com/graysky2/kernel_compiler_patch
+Desc:   Kernel >= 5.15 patch enables gcc = v11.1+ optimizations for additional CPUs.
