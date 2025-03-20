@@ -95,30 +95,6 @@ Patch:  1012_linux-6.12.13.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.12.13
 
-Patch:  1013_linux-6.12.14.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.14
-
-Patch:  1014_linux-6.12.15.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.15
-
-Patch:  1015_linux-6.12.16.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.16
-
-Patch:  1016_linux-6.12.17.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.17
-
-Patch:  1017_linux-6.12.18.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.18
-
-Patch:  1018_linux-6.12.19.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.12.19
-
 Patch:  1500_fortify-copy-size-value-range-tracking-fix.patch
 From:   https://git.kernel.org/
 Desc:   fortify: Hide run-time copy size from value range tracking
@@ -139,6 +115,10 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
+Patch:  2400_wifi-mt76-mt7921-null-ptr-deref-fix.patch
+From:   https://github.com/nbd168/wireless/commit/adc3fd2a2277b7cc0b61692463771bf9bd298036
+Desc:   wifi: mt76: mt7921: fix kernel panic due to null pointer dereference
+
 Patch:  2901_tools-lib-subcmd-compile-fix.patch
 From:   https://lore.kernel.org/all/20240731085217.94928-1-michael.weiss@aisec.fraunhofer.de/
 Desc:   tools lib subcmd: Fixed uninitialized use of variable in parse-options
@@ -151,9 +131,9 @@ Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
 
-Patch:  2980_kbuild-gcc15-gnu23-to-gnu11-fix.patch
-From:   https://github.com/hhoffstaette/kernel-patches/
-Desc:   gcc 15 kbuild fixes
+Patch:  2980_GCC15-gnu23-to-gnu11-fix.patch
+From:   https://lore.kernel.org/linux-kbuild/20241119044724.GA2246422@thelio-3990X/
+Desc:   GCC 15 defaults to -std=gnu23. Hack in CSTD_FLAG to pass -std=gnu11 everywhere.
 
 Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/
