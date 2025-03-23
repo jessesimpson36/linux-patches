@@ -399,10 +399,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2011_netfilter-nf-tables-allow-clone-callbacks-to-sleep.patch
-From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-Desc:   netfilter: nf_tables: allow clone callbacks to sleep
-
 Patch:  2400_wifi-rtw89-88xb-firmware patch
 From:   https://bugs.gentoo.org/946802
 Desc:   wifi: rtw89: 885xb: reset IDMEM mode to prevent download firmware failure
