@@ -151,10 +151,6 @@ Patch:  2400_wifi-mt76-mt7921-null-ptr-deref-fix.patch
 From:   https://github.com/nbd168/wireless/commit/adc3fd2a2277b7cc0b61692463771bf9bd298036
 Desc:   wifi: mt76: mt7921: fix kernel panic due to null pointer dereference
 
-Patch:  2901_tools-lib-subcmd-compile-fix.patch
-From:   https://lore.kernel.org/all/20240731085217.94928-1-michael.weiss@aisec.fraunhofer.de/
-Desc:   tools lib subcmd: Fixed uninitialized use of variable in parse-options
-
 Patch:  2910_bfp-mark-get-entry-ip-as--maybe-unused.patch
 From:   https://www.spinics.net/lists/stable/msg604665.html
 Desc:   bpf: mark get_entry_ip as __maybe_unused
