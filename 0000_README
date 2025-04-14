@@ -46,3 +46,5 @@ Individual Patch Descriptions:
 Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
+
+this is a test
