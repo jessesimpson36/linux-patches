@@ -137,5 +137,5 @@ Desc:   BMQ(BitMap Queue) Scheduler. A new CPU scheduler developed from PDS(incl
 
 Patch:  5021_BMQ-and-PDS-gentoo-defaults.patch
 From:   https://gitweb.gentoo.org/proj/linux-patches.git/
-Desc:   Set defaults for BMQ. default to n test
+Desc:   Set defaults for BMQ. default to n test another
 
