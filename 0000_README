@@ -595,9 +595,13 @@ Patch:  1136_linux-6.1.137.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.137
 
-Patch:  1137_linux-6.1.139.patch
+Patch:  1137_linux-6.1.138.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.138
+
+Patch:  1138_linux-6.1.139.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.1.139
 
 Patch:  1500_XATTR_USER_PREFIX.patch
 From:   https://bugs.gentoo.org/show_bug.cgi?id=470644
