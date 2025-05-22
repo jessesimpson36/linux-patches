@@ -90,10 +90,6 @@ Patch:  1740_x86-insn-decoder-test-allow-longer-symbol-names.patch
 From:   https://gitlab.com/cki-project/kernel-ark/-/commit/8d4a52c3921d278f27241fc0c6949d8fdc13a7f5
 Desc:   x86/insn_decoder_test: allow longer symbol-names
 
-Patch:  1900_eventpoll-Prevent-hang-in-epoll-wait.patch
-From:   https://lore.kernel.org/linux-fsdevel/20250429153419.94723-1-jdamato@fastly.com/T/#u
-Desc:   eventpoll: Prevent hang in epoll_wait
-
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
