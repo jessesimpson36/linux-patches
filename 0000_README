@@ -82,6 +82,10 @@ Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:   https://github.com/KSPP/linux/issues/109
 Desc:   Address -Warray-bounds warnings 
 
+Patch:  1710_ftrace-x86-Fix-compile-err-get_kernel_nofault.patch
+From:   https://lore.kernel.org/all/173881156244.211648.1242168038709680511.stgit@devnote2/
+Desc:   ftrace: x86: Fix a compile error about get_kernel_nofault()
+
 Patch:  1730_parisc-Disable-prctl.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:   prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc

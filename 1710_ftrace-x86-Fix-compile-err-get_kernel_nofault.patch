@@ -1,0 +1,119 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] ftrace: x86: Fix a compile error about
+ get_kernel_nofault()
+From: "Masami Hiramatsu (Google)" <mhiramat@kernel.org>
+Date: Thu, 06 Feb 2025 12:12:42 +0900
+Message-Id: <173881156244.211648.1242168038709680511.stgit@devnote2>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Fix a compile error about get_kernel_nofault() which is defined in the
+linux/uaccess.h. Since asm/ftrace.h is widely used, including
+linux/uaccess.h in asm/ftrace.h caused another error. Thus this
+moves arch_ftrace_get_symaddr() into arch/x86/kernel/ftrace.c.
+
+The original errors look like:
+
+In file included from ./arch/x86/include/asm/asm-prototypes.h:2,
+                 from <stdin>:3:
+./arch/x86/include/asm/ftrace.h: In function 'arch_ftrace_get_symaddr':
+./arch/x86/include/asm/ftrace.h:46:21: error: implicit declaration of function 'get_kernel_nofault' [-Werror=implicit-function-declaration]
+   46 |                 if (get_kernel_nofault(instr, (u32 *)(fentry_ip - ENDBR_INSN_SIZE)))
+      |                     ^~~~~~~~~~~~~~~~~~
+
+This also makes ftrace_get_symaddr() available only when
+CONFIG_HAVE_FENTRY=y on x86.
+
+Reported-by: Gabriel de Perthuis <g2p.code@gmail.com>
+Closes: https://lore.kernel.org/all/a87f98bf-45b1-4ef5-aa77-02f7e61203f4@gmail.com/
+Reported-by: Haiyue Wang <haiyuewa@163.com>
+Closes: https://lore.kernel.org/all/20250205180116.88644-1-haiyuewa@163.com/
+Fixes: 2bc56fdae1ba ("ftrace: Add ftrace_get_symaddr to convert fentry_ip to symaddr")
+Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+Acked-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Acked-by: Alexei Starovoitov <ast@kernel.org>
+Acked-by: Andrii Nakryiko <andrii@kernel.org>
+---
+ arch/x86/include/asm/ftrace.h |   23 ++++-------------------
+ arch/x86/kernel/ftrace.c      |   26 +++++++++++++++++++++++++-
+ 2 files changed, 29 insertions(+), 20 deletions(-)
+
+diff --git a/arch/x86/include/asm/ftrace.h b/arch/x86/include/asm/ftrace.h
+index f9cb4d07df58..1ed08f2de366 100644
+--- a/arch/x86/include/asm/ftrace.h
++++ b/arch/x86/include/asm/ftrace.h
+@@ -34,26 +34,11 @@ static inline unsigned long ftrace_call_adjust(unsigned long addr)
+ 	return addr;
+ }
+ 
+-static inline unsigned long arch_ftrace_get_symaddr(unsigned long fentry_ip)
+-{
+-#ifdef CONFIG_X86_KERNEL_IBT
+-	u32 instr;
+-
+-	/* We want to be extra safe in case entry ip is on the page edge,
+-	 * but otherwise we need to avoid get_kernel_nofault()'s overhead.
+-	 */
+-	if ((fentry_ip & ~PAGE_MASK) < ENDBR_INSN_SIZE) {
+-		if (get_kernel_nofault(instr, (u32 *)(fentry_ip - ENDBR_INSN_SIZE)))
+-			return fentry_ip;
+-	} else {
+-		instr = *(u32 *)(fentry_ip - ENDBR_INSN_SIZE);
+-	}
+-	if (is_endbr(instr))
+-		fentry_ip -= ENDBR_INSN_SIZE;
+-#endif
+-	return fentry_ip;
+-}
++/* This does not support mcount. */
++#ifdef CONFIG_HAVE_FENTRY
++unsigned long arch_ftrace_get_symaddr(unsigned long fentry_ip);
+ #define ftrace_get_symaddr(fentry_ip)	arch_ftrace_get_symaddr(fentry_ip)
++#endif
+ 
+ #ifdef CONFIG_HAVE_DYNAMIC_FTRACE_WITH_ARGS
+ 
+diff --git a/arch/x86/kernel/ftrace.c b/arch/x86/kernel/ftrace.c
+index 166bc0ea3bdf..7250118005fc 100644
+--- a/arch/x86/kernel/ftrace.c
++++ b/arch/x86/kernel/ftrace.c
+@@ -29,11 +29,35 @@
+ 
+ #include <trace/syscall.h>
+ 
+-#include <asm/kprobes.h>
+ #include <asm/ftrace.h>
++#include <asm/ibt.h>
++#include <asm/kprobes.h>
+ #include <asm/nops.h>
+ #include <asm/text-patching.h>
+ 
++#ifdef CONFIG_HAVE_FENTRY
++/* Convert fentry address to the symbol address. */
++unsigned long arch_ftrace_get_symaddr(unsigned long fentry_ip)
++{
++#ifdef CONFIG_X86_KERNEL_IBT
++	u32 instr;
++
++	/* We want to be extra safe in case entry ip is on the page edge,
++	 * but otherwise we need to avoid get_kernel_nofault()'s overhead.
++	 */
++	if ((fentry_ip & ~PAGE_MASK) < ENDBR_INSN_SIZE) {
++		if (get_kernel_nofault(instr, (u32 *)(fentry_ip - ENDBR_INSN_SIZE)))
++			return fentry_ip;
++	} else {
++		instr = *(u32 *)(fentry_ip - ENDBR_INSN_SIZE);
++	}
++	if (is_endbr(instr))
++		fentry_ip -= ENDBR_INSN_SIZE;
++#endif
++	return fentry_ip;
++}
++#endif
++
+ #ifdef CONFIG_DYNAMIC_FTRACE
+ 
+ static int ftrace_poke_late = 0;
+
