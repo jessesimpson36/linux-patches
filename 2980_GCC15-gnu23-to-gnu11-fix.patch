@@ -52,17 +52,6 @@ https://lore.kernel.org/linux-kbuild/20241119044724.GA2246422@thelio-3990X/
  VDSO_CFLAGS  += -O2
  # Some useful compiler-dependent flags from top-level Makefile
  VDSO_CFLAGS += $(call cc32-option,-Wno-pointer-sign)
---- a/arch/x86/Makefile	2025-05-03 15:21:48.644723563 -0400
-+++ b/arch/x86/Makefile	2025-05-03 15:33:07.495502552 -0400
-@@ -43,7 +43,7 @@ endif
- 
- # How to compile the 16-bit code.  Note we always compile for -march=i386;
- # that way we can complain to the user if the CPU is insufficient.
--REALMODE_CFLAGS	:= -m16 -g -Os -DDISABLE_BRANCH_PROFILING -D__DISABLE_EXPORTS \
-+REALMODE_CFLAGS	:= $(CSTD_FLAG) -m16 -g -Os -DDISABLE_BRANCH_PROFILING -D__DISABLE_EXPORTS \
- 		   -Wall -Wstrict-prototypes -march=i386 -mregparm=3 \
- 		   -fno-strict-aliasing -fomit-frame-pointer -fno-pic \
- 		   -mno-mmx -mno-sse $(call cc-option,-fcf-protection=none)
 --- a/drivers/firmware/efi/libstub/Makefile	2025-05-03 15:22:44.523804022 -0400
 +++ b/drivers/firmware/efi/libstub/Makefile	2025-05-03 15:34:35.211231426 -0400
 @@ -7,7 +7,7 @@
