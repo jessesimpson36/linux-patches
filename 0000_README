@@ -110,10 +110,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2700_amd-revert-vmin-vmax-for-freesync.patch
-From:   https://github.com/archlinux/linux/commit/30dd9945fd79d33a049da4e52984c9bc07450de2.patch
-Desc:   Revert "drm/amd/display: more liberal vmin/vmax update for freesync"
-
 Patch:  2901_permit-menuconfig-sorting.patch
 From:   https://lore.kernel.org/
 Desc:   menuconfig: Allow sorting the entries alphabetically
