@@ -171,6 +171,10 @@ Patch:  1031_linux-6.12.32.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.12.32
 
+Patch:  1032_linux-6.12.33.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.12.33
+
 Patch:  1500_fortify-copy-size-value-range-tracking-fix.patch
 From:   https://git.kernel.org/
 Desc:   fortify: Hide run-time copy size from value range tracking
