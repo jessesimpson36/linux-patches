@@ -451,6 +451,10 @@ Patch:  2800_amdgpu-Adj-kmalloc-array-calls-for-new-Walloc-size.patch
 From:   sam@gentoo.org
 Desc:   amdgpu: Adjust kmalloc_array calls for new -Walloc-size
 
+Patch:  2810_media-v4l-subdev-state-comfig-media-controller-fix.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/patch/?id=08e5c36410ca5cb14237e47e6dfe3fde02e0f275
+Desc:   media: v4l: subdev: Move out subdev state lock macros outside CONFIG_MEDIA_CONTROLLER
+
 Patch:  2910_bfp-mark-get-entry-ip-as--maybe-unused.patch
 From:   https://www.spinics.net/lists/stable/msg604665.html
 Desc:   bpf: mark get_entry_ip as __maybe_unused
