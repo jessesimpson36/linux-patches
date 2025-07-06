@@ -43,7 +43,7 @@ EXPERIMENTAL
 Individual Patch Descriptions:
 --------------------------------------------------------------------------
 
-Patch:  1000_linux-6.12.1.patch
+Patch:  1001_linux-6.12.1.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.12.1
 
@@ -182,6 +182,10 @@ Desc:   Linux 6.12.34
 Patch:  1034_linux-6.12.35.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.12.35
+
+Patch:  1035_linux-6.12.36.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.12.36
 
 Patch:  1500_fortify-copy-size-value-range-tracking-fix.patch
 From:   https://git.kernel.org/
