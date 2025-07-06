@@ -463,10 +463,6 @@ Patch:  1104_linux-6.1.105.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.105
 
-Patch:  1104_linux-6.1.105.patch
-From:   https://www.kernel.org
-Desc:   Linux 6.1.105
-
 Patch:  1105_linux-6.1.106.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.106
@@ -614,6 +610,10 @@ Desc:   Linux 6.1.141
 Patch:  1141_linux-6.1.142.patch
 From:   https://www.kernel.org
 Desc:   Linux 6.1.142
+
+Patch:  1142_linux-6.1.143.patch
+From:   https://www.kernel.org
+Desc:   Linux 6.1.143
 
 Patch:  1500_XATTR_USER_PREFIX.patch
 From:   https://bugs.gentoo.org/show_bug.cgi?id=470644
