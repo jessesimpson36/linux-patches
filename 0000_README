@@ -79,6 +79,10 @@ Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
 From:   https://lore.kernel.org/bpf/
 Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
 
+Patch:  2991_libbpf_add_WERROR_option.patch
+From:   https://lore.kernel.org/bpf/
+Desc:   libbpf: suppress adding -werror is WERROR=0
+
 Patch:  3000_Support-printing-firmware-info.patch
 From:   https://bugs.gentoo.org/732852
 Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
