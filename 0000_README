@@ -71,6 +71,10 @@ Patch:  2901_permit-menuconfig-sorting.patch
 From:   https://lore.kernel.org/
 Desc:   menuconfig: Allow sorting the entries alphabetically
 
+Patch:  2910_kheaders_override_TAR.patch
+From:   https://lore.kernel.org/
+Desc:   Add TAR make variable for override the tar executable
+
 Patch:  2920_sign-file-patch-for-libressl.patch
 From:   https://bugs.gentoo.org/717166
 Desc:   sign-file: full functionality with modern LibreSSL
