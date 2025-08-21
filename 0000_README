@@ -63,10 +63,6 @@ Patch:  1730_parisc-Disable-prctl.patch
 From:   https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:   prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
 
-Patch:  1900_btrfs_fix_log_tree_replay_failure.patch
-From:   https://gitlab.com/cki-project/kernel-ark/-/commit/e6c71b29fab08fd0ab55d2f83c4539d68d543895
-Desc:   btrfs: fix log tree replay failure due to file with 0 links and extents
-
 Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
