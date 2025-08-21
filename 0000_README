@@ -95,10 +95,6 @@ Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.
 
-Patch:  5010_enable-cpu-optimizations-universal.patch
-From:   https://github.com/graysky2/kernel_compiler_patch
-Desc:   More ISA levels and uarches for kernel 6.16+
-
 Patch:  5020_BMQ-and-PDS-io-scheduler-v6.16-r0.patch
 From:   https://gitlab.com/alfredchen/projectc
 Desc:   BMQ(BitMap Queue) Scheduler. A new CPU scheduler developed from PDS(incld). Inspired by the scheduler in zircon.
