@@ -1,8 +1,10 @@
+diff --git a/drivers/hid/hid-apple.c b/drivers/hid/hid-apple.c
+index 05d79b01d..159ccbe6a 100644
 --- a/drivers/hid/hid-apple.c
 +++ b/drivers/hid/hid-apple.c
-@@ -52,6 +52,22 @@
- 		"(For people who want to keep Windows PC keyboard muscle memory. "
- 		"[0] = as-is, Mac layout. 1 = swapped, Windows layout.)");
+@@ -57,6 +57,22 @@ MODULE_PARM_DESC(swap_fn_leftctrl, "Swap the Fn and left Control keys. "
+ 		"(For people who want to keep PC keyboard muscle memory. "
+ 		"[0] = as-is, Mac layout, 1 = swapped, PC layout)");
  
 +static unsigned int swap_fn_leftctrl;
 +module_param(swap_fn_leftctrl, uint, 0644);
@@ -23,7 +25,7 @@
  struct apple_sc {
  	unsigned long quirks;
  	unsigned int fn_on;
-@@ -164,6 +180,21 @@
+@@ -196,6 +212,21 @@ static const struct apple_key_translation swapped_fn_leftctrl_keys[] = {
  	{ }
  };
  
@@ -45,21 +47,7 @@
  static const struct apple_key_translation *apple_find_translation(
  		const struct apple_key_translation *table, u16 from)
  {
-@@ -183,9 +214,11 @@
- 	struct apple_sc *asc = hid_get_drvdata(hid);
- 	const struct apple_key_translation *trans, *table;
- 
--	if (usage->code == KEY_FN) {
-+	u16 fn_keycode = (swap_fn_leftctrl) ? (KEY_LEFTCTRL) : (KEY_FN);
-+
-+	if (usage->code == fn_keycode) {
- 		asc->fn_on = !!value;
--		input_event(input, usage->type, usage->code, value);
-+		input_event(input, usage->type, KEY_FN, value);
- 		return 1;
- 	}
- 
-@@ -264,6 +297,30 @@
+@@ -316,6 +347,30 @@ static int hidinput_apple_event(struct hid_device *hid, struct input_dev *input,
  		}
  	}
  
@@ -90,11 +78,10 @@
  	return 0;
  }
  
-@@ -327,6 +384,21 @@
- 
+@@ -387,6 +442,21 @@ static void apple_setup_input(struct input_dev *input)
  	for (trans = apple_iso_keyboard; trans->from; trans++)
  		set_bit(trans->to, input->keybit);
-+
+ 
 +	if (swap_fn_leftctrl) {
 +		for (trans = swapped_fn_leftctrl_keys; trans->from; trans++)
 +			set_bit(trans->to, input->keybit);
@@ -109,6 +96,7 @@
 +		for (trans = rightalt_as_rightctrl_keys; trans->from; trans++)
 +			set_bit(trans->to, input->keybit);
 +	}
- }
++
+ 	for (trans = apple2021_fn_keys; trans->from; trans++)
+ 		set_bit(trans->to, input->keybit);
  
- static int apple_input_mapping(struct hid_device *hdev, struct hid_input *hi,
