@@ -83,10 +83,6 @@ Patch:  2010_ipv4_fix_regression_in_local-broadcast_routes.patch
 From:   https://lore.kernel.org/regressions/20250826121750.8451-1-oscmaes92@gmail.com/
 Desc:   net: ipv4: fix regression in local-broadcast routes
 
-Patch:  2011_devlink_let_driver_opt_out_of_automatic_phys_port_name_generation.patch
-From:   https://lore.kernel.org/all/20597f81c1439569e34d026542365aef1cedfb00.1756088250.git.calvin@wbinvd.org/
-Desc:   devlink: let driver opt out of automatic phys_port_name generation
-
 Patch:  2901_permit-menuconfig-sorting.patch
 From:   https://lore.kernel.org/
 Desc:   menuconfig: Allow sorting the entries alphabetically
