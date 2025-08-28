@@ -223,6 +223,10 @@ Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
 From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
 Desc:   Enable link security restrictions by default.
 
+Patch:  1520_revert_fs_prevent_file_descriptor_table_allocation.patch
+From:   https://bugs.gentoo.org/961922
+Desc:   revert prevent file descriptor table allocation, possible causing crashes
+
 Patch:  1700_sparc-address-warray-bound-warnings.patch
 From:   https://github.com/KSPP/linux/issues/109
 Desc:   Address -Warray-bounds warnings 
