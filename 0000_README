@@ -83,6 +83,10 @@ Patch:  2010_ipv4_fix_regression_in_local-broadcast_routes.patch
 From:   https://lore.kernel.org/regressions/20250826121750.8451-1-oscmaes92@gmail.com/
 Desc:   net: ipv4: fix regression in local-broadcast routes
 
+Patch:  2700_asus-wmi_fix_racy_registrations.patch
+From:   https://lore.kernel.org/all/20250827052441.23382-1-tiwai@suse.de/#Z31drivers:platform:x86:asus-wmi.c
+Desc:   platform/x86: asus-wmi: Fix racy registrations
+
 Patch:  2901_permit-menuconfig-sorting.patch
 From:   https://lore.kernel.org/
 Desc:   menuconfig: Allow sorting the entries alphabetically
