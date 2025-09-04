@@ -83,10 +83,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2010_ipv4_fix_regression_in_local-broadcast_routes.patch
-From:   https://lore.kernel.org/regressions/20250826121750.8451-1-oscmaes92@gmail.com/
-Desc:   net: ipv4: fix regression in local-broadcast routes
-
 Patch:  2700_asus-wmi_fix_racy_registrations.patch
 From:   https://lore.kernel.org/all/20250827052441.23382-1-tiwai@suse.de/#Z31drivers:platform:x86:asus-wmi.c
 Desc:   platform/x86: asus-wmi: Fix racy registrations
