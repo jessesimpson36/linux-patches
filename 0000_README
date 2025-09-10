@@ -87,10 +87,6 @@ Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
 From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
 Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
 
-Patch:  2700_asus-wmi_fix_racy_registrations.patch
-From:   https://lore.kernel.org/all/20250827052441.23382-1-tiwai@suse.de/#Z31drivers:platform:x86:asus-wmi.c
-Desc:   platform/x86: asus-wmi: Fix racy registrations
-
 Patch:  2901_permit-menuconfig-sorting.patch
 From:   https://lore.kernel.org/
 Desc:   menuconfig: Allow sorting the entries alphabetically
