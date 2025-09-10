@@ -475,6 +475,10 @@ Patch:  1730_parisc-Disable-prctl.patch
 From:	  https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
 Desc:	  prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
 
+Patch:  1801_proc_fix_type_confusion_in_pde_set_flags.patch
+From:   https://lore.kernel.org/linux-fsdevel/20250904135715.3972782-1-wangzijie1@honor.com/
+Desc:   proc: fix type confusion in pde_set_flags()
+
 Patch:  1900_btrfs-dev-mapper-name-soft-link-fix.patch
 From:	  https://lore.kernel.org/linux-btrfs/30aefd8b4e8c1f0c5051630b106a1ff3570d28ed.1735537399.git.wqu@suse.com/T/#u
 Desc:	  btrfs: prefer to use "/dev/mapper/name" soft link instead of "/dev/dm-*"
