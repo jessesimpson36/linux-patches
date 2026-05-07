@@ -1,24 +1,3 @@
-From 15772d7f271de72be9e954a37de4a820ceeeae92 Mon Sep 17 00:00:00 2001
-From: Arisu Tachibana <alicef@gentoo.org>
-Date: Fri, 14 Nov 2025 17:09:23 +0900
-Subject: [PATCH] 4567_distro-Gentoo-Kconfig.patch
-
-Drop structleak gcc plugin
-Ref: https://github.com/torvalds/linux/commit/8530ea3c9b9747faba46ed3a59ad103b894f1189
-
-Drop ARCH_EPHEMERAL_INODES
-Ref: https://github.com/torvalds/linux/commit/74ce793bcbde5cef0f82d6ccb3c47cb651295a9a
-
-Switch to RANDSTRUCT_FULL
-
-Signed-off-by: Arisu Tachibana <alicef@gentoo.org>
----
- Kconfig        |   2 +
- distro/Kconfig | 310 +++++++++++++++++++++++++++++++++++++++++++++++++
- mm/Kconfig     |   2 +
- 3 files changed, 314 insertions(+)
- create mode 100644 distro/Kconfig
-
 diff --git a/Kconfig b/Kconfig
 index 307e58114..91aa4be3d 100644
 --- a/Kconfig
@@ -29,12 +8,9 @@ index 307e58114..91aa4be3d 100644
  source "io_uring/Kconfig"
 +
 +source "distro/Kconfig"
-diff --git a/distro/Kconfig b/distro/Kconfig
-new file mode 100644
-index 000000000..41797d8f8
---- /dev/null
-+++ b/distro/Kconfig
-@@ -0,0 +1,310 @@
+--- /dev/null	2026-05-07 13:22:28.820727378 -0400
++++ b/distro/Kconfig	2026-05-07 14:40:00.105078860 -0400
+@@ -0,0 +1,307 @@
 +menu "Gentoo Linux"
 +
 +config GENTOO_LINUX
@@ -152,9 +128,6 @@ index 000000000..41797d8f8
 +	select BPF_SYSCALL
 +	select CGROUP_BPF
 +	select CGROUPS
-+	select CRYPTO_HMAC 
-+	select CRYPTO_SHA256
-+	select CRYPTO_USER_API_HASH
 +	select DEVPTS_MULTIPLE_INSTANCES
 +	select DMIID if X86_32 || X86_64 || X86
 +	select EPOLL
