@@ -43,6 +43,46 @@ EXPERIMENTAL
 Individual Patch Descriptions:
 --------------------------------------------------------------------------
 
+Patch:  1510_fs-enable-link-security-restrictions-by-default.patch
+From:   http://sources.debian.net/src/linux/3.16.7-ckt4-3/debian/patches/debian/fs-enable-link-security-restrictions-by-default.patch/
+Desc:   Enable link security restrictions by default.
+
+Patch:  1605_crypto-nx-fix-nx-crypto-ctx-exit-arg.patch
+From:   https://lore.kernel.org/all/a3e89c1e8342ffa415b0d29725a0571a4f355d34.1779472902.git.sam@gentoo.org/
+Desc:   crypto: nx: fix nx_crypto_ctx_exit argument
+
+Patch:  1700_sparc-address-warray-bound-warnings.patch
+From:   https://github.com/KSPP/linux/issues/109
+Desc:   Address -Warray-bounds warnings
+
+Patch:  1730_parisc-Disable-prctl.patch
+From:   https://git.kernel.org/pub/scm/linux/kernel/git/deller/parisc-linux.git
+Desc:   prctl: Temporarily disable prctl(PR_SET_MDWE) on parisc
+
+Patch:  2000_BT-Check-key-sizes-only-if-Secure-Simple-Pairing-enabled.patch
+From:   https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/raw
+Desc:   Bluetooth: Check key sizes only when Secure Simple Pairing is enabled. See bug #686758
+
+Patch:  2901_permit-menuconfig-sorting.patch
+From:   https://lore.kernel.org/
+Desc:   menuconfig: Allow sorting the entries alphabetically
+
+Patch:  2902_Replace-CONST-CAST-with-const-cast.patch
+From:   https://lore.kernel.org/all/abV0OEcoN6H_QZEP@spatz.zoo/2-0001-Replace-CONST_CAST-with-const_cast.patch
+Desc:   Replace CONST_CAST with const_cast<>.
+
+Patch:  2990_libbpf-v2-workaround-Wmaybe-uninitialized-false-pos.patch
+From:   https://lore.kernel.org/bpf/
+Desc:   libbpf: workaround -Wmaybe-uninitialized false positive
+
+Patch:  2991_libbpf_add_WERROR_option.patch
+From:   https://lore.kernel.org/bpf/
+Desc:   libbpf: suppress adding -werror is WERROR=0
+
+Patch:  3000_Support-printing-firmware-info.patch
+From:   https://bugs.gentoo.org/732852
+Desc:   Print firmware info (Reqs CONFIG_GENTOO_PRINT_FIRMWARE_INFO). Thanks to Georgy Yakovlev
+
 Patch:  4567_distro-Gentoo-Kconfig.patch
 From:   Tom Wijsman <TomWij@gentoo.org>
 Desc:   Add Gentoo Linux support config settings and defaults.

@@ -1,0 +1,20 @@
+--- a/scripts/gcc-plugins/gcc-common.h	2026-06-01 14:00:57.169236997 -0400
++++ b/scripts/gcc-plugins/gcc-common.h	2026-06-01 14:02:23.355516803 -0400
+@@ -416,7 +416,7 @@ static inline void ipa_remove_stmt_refer
+ #ifdef __cplusplus
+ static inline void debug_tree(const_tree t)
+ {
+-	debug_tree(CONST_CAST_TREE(t));
++  debug_tree(const_cast<tree>(t));
+ }
+ 
+ static inline void debug_gimple_stmt(const_gimple s)
+@@ -424,7 +424,7 @@ static inline void debug_gimple_stmt(con
+ 	debug_gimple_stmt(CONST_CAST_GIMPLE(s));
+ }
+ #else
+-#define debug_tree(t) debug_tree(CONST_CAST_TREE(t))
++#define debug_tree(t) debug_tree(const_cast<tree>(t))
+ #define debug_gimple_stmt(s) debug_gimple_stmt(CONST_CAST_GIMPLE(s))
+ #endif
+ 
